@@ -1,0 +1,4 @@
+# Cloudflare Pages build configuration
+build:
+  command: pnpm build
+  directory: .next
