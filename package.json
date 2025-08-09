@@ -1,0 +1,63 @@
+{
+  "name": "photonpong",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "prisma db seed",
+    "prepare": "simple-git-hooks"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.10.0",
+    "@prisma/client": "^6.13.0",
+    "@supabase/supabase-js": "^2.54.0",
+    "@upstash/redis": "^1.35.3",
+    "next": "15.4.6",
+    "next-auth": "^4.24.11",
+    "phaser": "^3.90.0",
+    "posthog-js": "^1.258.6",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "zod": "^4.0.15",
+    "zustand": "^5.0.7"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.54.2",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^20.19.9",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.6",
+    "jsdom": "^26.1.0",
+    "lint-staged": "^16.1.4",
+    "prettier": "^3.6.2",
+    "prisma": "^6.13.0",
+    "simple-git-hooks": "^2.13.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.20.3",
+    "typescript": "^5",
+    "vitest": "^3.2.4"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css,md}": "prettier --write"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

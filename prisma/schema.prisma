@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String       @id @default(cuid())
+  email      String       @unique
+  name       String?
+  createdAt  DateTime     @default(now())
+  profile    Profile?
+  matches1   Match[]      @relation("MatchP1")
+  matches2   Match[]      @relation("MatchP2")
+  leaderboard Leaderboard?
+  telemetry  Telemetry[]
+}
+
+model Profile {
+  user      User   @relation(fields: [userId], references: [id])
+  userId    String @id
+  displayName String?
+  avatarUrl   String?
+}
+
+model Match {
+  id        String   @id @default(cuid())
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+  mode      String
+  p1        User     @relation("MatchP1", fields: [p1Id], references: [id])
+  p1Id      String
+  p2        User?    @relation("MatchP2", fields: [p2Id], references: [id])
+  p2Id      String?
+  p1Score   Int
+  p2Score   Int
+  winner    User?    @relation("MatchWinner", fields: [winnerId], references: [id])
+  winnerId  String?
+}
+
+model Leaderboard {
+  user      User   @relation(fields: [userId], references: [id])
+  userId    String @id
+  elo       Int    @default(1000)
+  wins      Int    @default(0)
+  losses    Int    @default(0)
+  streak    Int    @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model Telemetry {
+  id        String   @id @default(cuid())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  eventType String
+  payload   Json
+  createdAt DateTime @default(now())
+}
