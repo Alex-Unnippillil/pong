@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 const schema = z.object({
   eventType: z.string(),
@@ -9,11 +11,21 @@ const schema = z.object({
 })
 
 export async function POST(req: Request) {
+  const session = await getServerSession(authOptions)
+  if (!session) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
   const json = await req.json()
   const parsed = schema.safeParse(json)
   if (!parsed.success) {
     return NextResponse.json({ error: 'invalid' }, { status: 400 })
   }
-  await prisma.telemetry.create({ data: parsed.data })
-  return NextResponse.json({ ok: true })
+  try {
+    await prisma.telemetry.create({
+      data: { ...parsed.data, userId: session.user.id },
+    })
+    return NextResponse.json({ ok: true })
+  } catch (_error) {
+    return NextResponse.json({ error: 'internal' }, { status: 500 })
+  }
 }
