@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
+import Link from 'next/link'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { AnalyticsProvider } from '../components/AnalyticsProvider'
@@ -30,6 +31,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AnalyticsProvider />
+        <header className="border-b p-4">
+          <nav className="flex gap-4">
+            <Link href="/">Home</Link>
+            <Link href="/leaderboard">Leaderboard</Link>
+          </nav>
+        </header>
         {children}
         <Script id="sw" strategy="afterInteractive">
           {`
