@@ -12,6 +12,15 @@ pnpm dev
 
 Copy `.env.example` to `.env.local` and fill in secrets.
 
+### Environment variables
+
+Configure Upstash credentials using the following names:
+
+- `UPSTASH_REDIS_URL` – Upstash Redis REST URL
+- `UPSTASH_REDIS_TOKEN` – Upstash Redis REST token
+
+Use these names when setting deployment secrets.
+
 ## Architecture Overview
 
 ```mermaid
