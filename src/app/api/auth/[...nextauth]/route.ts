@@ -5,7 +5,7 @@ import EmailProvider from 'next-auth/providers/email'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 
-const handler = NextAuth({
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     EmailProvider({
@@ -21,6 +21,8 @@ const handler = NextAuth({
       clientSecret: process.env.GOOGLE_SECRET!,
     }),
   ],
-})
+}
+
+const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }
