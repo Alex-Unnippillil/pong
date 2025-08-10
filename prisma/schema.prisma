@@ -26,11 +26,16 @@ model Profile {
   avatarUrl   String?
 }
 
+enum Mode {
+  SINGLEPLAYER
+  MULTIPLAYER
+}
+
 model Match {
   id        String   @id @default(cuid())
   startedAt DateTime @default(now())
   endedAt   DateTime?
-  mode      String
+  mode      Mode
   p1        User     @relation("MatchP1", fields: [p1Id], references: [id])
   p1Id      String
   p2        User?    @relation("MatchP2", fields: [p2Id], references: [id])
