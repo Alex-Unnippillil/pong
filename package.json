@@ -46,6 +46,7 @@
     "prettier": "^3.6.2",
     "prisma": "^6.13.0",
     "simple-git-hooks": "^2.13.1",
+    "supertest": "^7.1.4",
     "tailwindcss": "^4",
     "tsx": "^4.20.3",
     "typescript": "^5",
