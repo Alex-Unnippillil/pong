@@ -12,6 +12,15 @@ pnpm dev
 
 Copy `.env.example` to `.env.local` and fill in secrets.
 
+### Environment Variables
+
+The app expects the following environment variables:
+
+- `UPSTASH_REDIS_URL` – Upstash Redis REST URL
+- `UPSTASH_REDIS_TOKEN` – Upstash Redis REST token
+
+See `.env.example` for the complete list.
+
 ## Architecture Overview
 
 ```mermaid
