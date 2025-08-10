@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import Phaser from 'phaser'
+import { track } from '../lib/analytics'
 
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -9,6 +10,7 @@ export function GameCanvas() {
   useEffect(() => {
     if (!containerRef.current) return
 
+    const mode = 'local'
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: containerRef.current,
@@ -21,7 +23,10 @@ export function GameCanvas() {
       },
     })
 
+    track('game_start', { mode })
+
     return () => {
+      track('game_end', { mode, winner: 'none' })
       game.destroy(true)
     }
   }, [])

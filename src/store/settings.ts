@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { track } from '../lib/analytics'
 
 interface SettingsState {
   muted: boolean
@@ -7,5 +8,10 @@ interface SettingsState {
 
 export const useSettings = create<SettingsState>((set) => ({
   muted: false,
-  toggleMuted: () => set((s) => ({ muted: !s.muted })),
+  toggleMuted: () =>
+    set((s) => {
+      const next = !s.muted
+      track('settings_change', { setting: 'muted', value: next })
+      return { muted: next }
+    }),
 }))
