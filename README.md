@@ -31,3 +31,8 @@ graph LR
 - Run `pnpm prisma migrate dev` after changing the schema.
 - If Playwright tests fail, install browsers with `npx playwright install`.
 - Internationalization: currently only English is provided; add more locales under `src/locales/` as needed.
+
+## Offline Support
+
+The app registers a service worker that caches HTML, JavaScript, CSS, and game assets using a cache-first strategy.
+Assets are versioned, and outdated caches are cleared on activation, allowing the game to load and run even without a network connection after the first visit.
