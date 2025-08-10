@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import Phaser from 'phaser'
+import MainScene from '../game/mainScene'
 
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -9,19 +10,20 @@ export function GameCanvas() {
   useEffect(() => {
     if (!containerRef.current) return
 
+    const scene = new MainScene()
+
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: containerRef.current,
       width: 800,
       height: 600,
-      scene: {
-        preload() {},
-        create() {},
-        update() {},
-      },
+      physics: { default: 'arcade', arcade: { debug: false } },
+      scene,
     })
 
     return () => {
+      scene.input.keyboard?.removeAllListeners()
+      game.events.removeAllListeners()
       game.destroy(true)
     }
   }, [])
