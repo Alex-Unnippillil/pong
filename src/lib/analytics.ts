@@ -1,10 +1,11 @@
 import posthog from 'posthog-js'
+import { NEXT_PUBLIC_POSTHOG_KEY, NEXT_PUBLIC_POSTHOG_HOST } from '@/env'
 
 export function initAnalytics() {
   if (typeof window === 'undefined') return
-  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY
+  const key = NEXT_PUBLIC_POSTHOG_KEY
   if (!key) return
   posthog.init(key, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    api_host: NEXT_PUBLIC_POSTHOG_HOST,
   })
 }
