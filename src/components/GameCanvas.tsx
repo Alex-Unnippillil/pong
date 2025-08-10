@@ -2,8 +2,14 @@
 
 import { useEffect, useRef } from 'react'
 import Phaser from 'phaser'
+import { MainScene } from '../game/MainScene'
 
-export function GameCanvas() {
+type GameCanvasProps = {
+  width?: number
+  height?: number
+}
+
+export function GameCanvas({ width = 800, height = 600 }: GameCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -12,19 +18,18 @@ export function GameCanvas() {
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: containerRef.current,
-      width: 800,
-      height: 600,
-      scene: {
-        preload() {},
-        create() {},
-        update() {},
+      width,
+      height,
+      scene: MainScene,
+      physics: {
+        default: 'arcade',
       },
     })
 
     return () => {
       game.destroy(true)
     }
-  }, [])
+  }, [width, height])
 
   return <div ref={containerRef} />
 }
