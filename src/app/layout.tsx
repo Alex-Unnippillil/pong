@@ -3,6 +3,9 @@ import Script from 'next/script'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { AnalyticsProvider } from '../components/AnalyticsProvider'
+import { I18nProvider } from '../components/I18nProvider'
+import { LanguageSwitcher } from '../components/LanguageSwitcher'
+import i18n from '../i18n'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -15,8 +18,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'PhotonPong',
-  description: 'Modern Pong game',
+  title: i18n.t('title'),
+  description: i18n.t('description'),
 }
 
 export default function RootLayout({
@@ -25,12 +28,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang={i18n.language}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AnalyticsProvider />
-        {children}
+        <I18nProvider>
+          <AnalyticsProvider />
+          <LanguageSwitcher />
+          {children}
+        </I18nProvider>
         <Script id="sw" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
