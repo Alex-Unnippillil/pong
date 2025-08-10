@@ -25,6 +25,15 @@ graph LR
   C --> E[(Upstash Redis)]
 ```
 
+## Offline Testing
+
+To verify the service worker's offline cache:
+
+1. Run `pnpm dev` and open the app in your browser.
+2. In DevTools, confirm the service worker is registered under **Application → Service Workers**.
+3. Switch the Network panel to **Offline** and reload the page.
+4. The app should load using cached assets even without a network connection.
+
 ## Troubleshooting
 
 - Ensure Postgres database is reachable via `DATABASE_URL`.
