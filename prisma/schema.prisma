@@ -58,4 +58,7 @@ model Telemetry {
   eventType String
   payload   Json
   createdAt DateTime @default(now())
+
+  @@index([eventType])
+  @@index([createdAt])
 }
