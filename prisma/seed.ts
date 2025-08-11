@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Mode } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -27,7 +27,7 @@ async function main() {
 
   await prisma.match.create({
     data: {
-      mode: 'singleplayer',
+      mode: Mode.SINGLEPLAYER,
       p1Id: alice.id,
       p2Id: bob.id,
       p1Score: 11,
