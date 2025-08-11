@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+
+import { getServerAuthSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 const bodySchema = z.object({
@@ -10,6 +12,10 @@ const bodySchema = z.object({
 })
 
 export async function POST(req: Request) {
+  const session = await getServerAuthSession()
+  if (!session?.user) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
   const json = await req.json()
   const parsed = bodySchema.safeParse(json)
   if (!parsed.success) {
