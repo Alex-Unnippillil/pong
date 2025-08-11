@@ -12,6 +12,7 @@
     "e2e": "playwright test",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
+    "postinstall": "prisma generate",
     "prepare": "simple-git-hooks"
   },
   "dependencies": {

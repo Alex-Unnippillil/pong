@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client'
+import pkg from '@prisma/client'
 
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
+const PrismaClient = (pkg as any).PrismaClient
+const globalForPrisma = globalThis as unknown as { prisma?: any }
 
 export const prisma =
   globalForPrisma.prisma || new PrismaClient({ log: ['error', 'warn'] })
