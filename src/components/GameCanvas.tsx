@@ -1,30 +1,24 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import Phaser from 'phaser'
+
 
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const gameRef = useRef<PhaserType.Game>()
+  const muted = useSettings((s) => s.muted)
 
   useEffect(() => {
     if (!containerRef.current) return
-
-    const game = new Phaser.Game({
-      type: Phaser.AUTO,
-      parent: containerRef.current,
-      width: 800,
-      height: 600,
-      scene: {
-        preload() {},
-        create() {},
-        update() {},
-      },
-    })
-
-    return () => {
-      game.destroy(true)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return <div ref={containerRef} />
+  useEffect(() => {
+    if (gameRef.current) {
+      gameRef.current.sound.mute = muted
+    }
+  }, [muted])
+
+  return <div ref={containerRef} className="w-full h-full" />
 }
