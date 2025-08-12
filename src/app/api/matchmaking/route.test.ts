@@ -15,6 +15,7 @@ describe('matchmaking API', () => {
   it('enqueues user when no opponent is available', async () => {
     sessionMock.mockResolvedValueOnce({ user: { id: 'u1' } })
     vi.mocked(redis.lpop).mockResolvedValueOnce(null)
+    vi.mocked(redis.lpos).mockResolvedValueOnce(null)
 
     const res = await POST(jsonRequest({ mode: 'classic' }))
     const json = await res.json()
@@ -22,12 +23,29 @@ describe('matchmaking API', () => {
     expect(res.status).toBe(200)
     expect(json).toEqual({ queued: true })
     expect(redis.rpush).toHaveBeenCalledWith('matchmaking:queue', 'u1')
+    expect(redis.expire).toHaveBeenCalledWith('matchmaking:queue', 60)
+  })
+
+  it('does not enqueue duplicate user', async () => {
+    sessionMock.mockResolvedValueOnce({ user: { id: 'u1' } })
+    vi.mocked(redis.lpop).mockResolvedValueOnce('u1')
+    vi.mocked(redis.lpos).mockResolvedValueOnce(0)
+
+    const res = await POST(jsonRequest({ mode: 'classic' }))
+    const json = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(json).toEqual({ queued: true })
+    expect(redis.rpush).not.toHaveBeenCalled()
+    expect(redis.expire).toHaveBeenCalledWith('matchmaking:queue', 60)
   })
 
   it('creates match and returns details when opponent found', async () => {
     sessionMock.mockResolvedValueOnce({ user: { id: 'u2' } })
     vi.mocked(redis.lpop).mockResolvedValueOnce('u1')
-    vi.mocked(prisma.match.create).mockResolvedValueOnce({ id: 'm1' } as any)
+    vi.mocked(prisma.match.create).mockResolvedValueOnce({
+      id: 'm1',
+    } as unknown as { id: string })
 
     const res = await POST(jsonRequest({ mode: 'classic' }))
     const json = await res.json()
@@ -46,7 +64,9 @@ describe('matchmaking API', () => {
   it('defaults mode to classic when omitted', async () => {
     sessionMock.mockResolvedValueOnce({ user: { id: 'u2' } })
     vi.mocked(redis.lpop).mockResolvedValueOnce('u1')
-    vi.mocked(prisma.match.create).mockResolvedValueOnce({ id: 'm1' } as any)
+    vi.mocked(prisma.match.create).mockResolvedValueOnce({
+      id: 'm1',
+    } as unknown as { id: string })
 
     const res = await POST(jsonRequest({}))
     const json = await res.json()
