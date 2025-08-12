@@ -51,5 +51,20 @@ export function GameCanvas() {
     }
   }, [muted])
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (!containerRef.current || !gameRef.current) return
+      gameRef.current.scale.resize(
+        containerRef.current.clientWidth,
+        containerRef.current.clientHeight,
+      )
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
   return <div ref={containerRef} className="w-full h-full" />
 }
