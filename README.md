@@ -14,10 +14,22 @@ Copy `.env.example` to `.env.local` and fill in secrets.
 
 ### Environment variables
 
-Configure Upstash credentials using the following names:
+Set the following environment variables for the application:
 
+- `DATABASE_URL` – Postgres connection string
+- `NEXTAUTH_URL` – Base URL for NextAuth callbacks
+- `EMAIL_SERVER` – SMTP server connection string
+- `EMAIL_FROM` – Sender email address
+- `GITHUB_ID` – GitHub OAuth client ID
+- `GITHUB_SECRET` – GitHub OAuth client secret
+- `AUTH_SECRET` – NextAuth secret
 - `UPSTASH_REDIS_URL` – Upstash Redis REST URL
 - `UPSTASH_REDIS_TOKEN` – Upstash Redis REST token
+
+Optional variables:
+
+- `NEXT_PUBLIC_POSTHOG_KEY` – PostHog client key
+- `NEXT_PUBLIC_POSTHOG_HOST` – PostHog host URL
 
 Use these names when setting deployment secrets.
 
@@ -33,6 +45,12 @@ graph LR
   C --> D[(Postgres)]
   C --> E[(Upstash Redis)]
 ```
+
+## Background jobs
+
+When a match score is reported, a message is published to the `leaderboard:recalc`
+Redis channel. A separate worker can subscribe to this channel and rebuild the
+leaderboard asynchronously.
 
 ## Offline Testing
 

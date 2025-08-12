@@ -1,13 +1,10 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { redis } from '@/lib/redis'
-import { createRequire } from 'module'
 import { createHash } from 'node:crypto'
+import { z } from 'zod'
 
-const require = createRequire(import.meta.url)
-const { z } = require('zod')
-
-const schema = z.object({
+export const telemetrySchema = z.object({
   eventType: z.string(),
   payload: z
     .custom<Record<string, unknown>>(
@@ -40,7 +37,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'rate limited' }, { status: 429 })
   }
   const json = await req.json()
-  const parsed = schema.safeParse(json)
+  const parsed = telemetrySchema.safeParse(json)
   if (!parsed.success) {
     return NextResponse.json({ error: 'invalid' }, { status: 400 })
   }
