@@ -5,7 +5,13 @@ export async function GET() {
   const data = await prisma.leaderboard.findMany({
     take: 10,
     orderBy: { elo: 'desc' },
-    include: { user: true },
+    select: {
+      userId: true,
+      elo: true,
+      wins: true,
+      losses: true,
+      user: { select: { id: true, name: true } },
+    },
   })
   return NextResponse.json(data)
 }

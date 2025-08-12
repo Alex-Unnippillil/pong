@@ -6,6 +6,7 @@ interface LeaderboardEntry {
   wins: number
   losses: number
   user: {
+    id: string
     name: string | null
   } | null
 }
