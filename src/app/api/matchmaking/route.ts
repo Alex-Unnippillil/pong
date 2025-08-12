@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { getServerAuthSession } from '@/lib/auth'
 import { redis } from '@/lib/redis'
 import { prisma } from '@/lib/prisma'
+
+const bodySchema = z.object({
+  mode: z.enum(['classic']).default('classic'),
+})
 
 export const runtime = 'nodejs'
 
@@ -13,9 +18,12 @@ export async function POST(req: Request) {
   }
   const userId = session.user.id
   try {
-    const { mode = 'classic' } = (await req.json().catch(() => ({}))) as {
-      mode?: string
+    const json = await req.json().catch(() => ({}))
+    const parsed = bodySchema.safeParse(json)
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'invalid mode' }, { status: 400 })
     }
+    const { mode } = parsed.data
     const opponent = await redis.lpop<string>('matchmaking:queue')
     if (!opponent) {
       await redis.rpush('matchmaking:queue', userId)
