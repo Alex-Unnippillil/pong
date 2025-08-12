@@ -12,7 +12,6 @@ pnpm dev
 
 Copy `.env.example` to `.env.local` and fill in secrets.
 
-<
 ## Architecture Overview
 
 ```mermaid
