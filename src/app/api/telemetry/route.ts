@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server'
-import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { redis } from '@/lib/redis'
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
+const { z } = require('zod')
 
 const schema = z.object({
   eventType: z.string(),
   payload: z
-    .record(z.any())
+    .custom<Record<string, unknown>>(
+      (val) => typeof val === 'object' && val !== null && !Array.isArray(val),
+    )
     .refine((val) => Object.keys(val).length <= 50, {
       message: 'payload too large',
     })
