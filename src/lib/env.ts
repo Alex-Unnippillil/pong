@@ -12,6 +12,7 @@ const envSchema = z.object({
   AUTH_SECRET: z.string(),
   UPSTASH_REDIS_URL: z.string().url(),
   UPSTASH_REDIS_TOKEN: z.string(),
+  MATCHMAKING_QUEUE_TTL_SECONDS: z.coerce.number().int().positive().default(60),
 })
 
 const parsed = envSchema.safeParse(process.env)

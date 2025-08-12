@@ -21,6 +21,16 @@ vi.mock('@/lib/redis', () => {
   return { redis }
 })
 
+process.env.DATABASE_URL ??= 'postgresql://user:pass@localhost:5432/db'
+process.env.NEXTAUTH_URL ??= 'http://localhost:3000'
+process.env.EMAIL_SERVER ??= 'smtp://user:pass@localhost'
+process.env.EMAIL_FROM ??= 'noreply@example.com'
+process.env.GITHUB_ID ??= 'id'
+process.env.GITHUB_SECRET ??= 'secret'
+process.env.AUTH_SECRET ??= 'secret'
+process.env.UPSTASH_REDIS_URL ??= 'https://redis.example.com'
+process.env.UPSTASH_REDIS_TOKEN ??= 'token'
+
 afterEach(() => {
   vi.clearAllMocks()
 })

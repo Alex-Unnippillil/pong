@@ -30,6 +30,7 @@ Optional variables:
 
 - `NEXT_PUBLIC_POSTHOG_KEY` – PostHog client key
 - `NEXT_PUBLIC_POSTHOG_HOST` – PostHog host URL
+- `MATCHMAKING_QUEUE_TTL_SECONDS` – TTL in seconds for the matchmaking queue (default 60)
 
 Use these names when setting deployment secrets.
 
