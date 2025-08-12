@@ -49,18 +49,25 @@ export default class MainScene extends Phaser.Scene {
       .text((width * 3) / 4, 20, '0', { color: '#fff', fontSize: '32px' })
       .setOrigin(0.5, 0.5)
 
-    this.score.onMatchEnd((result) => {
+    this.score.onMatchEnd(async (result) => {
       this.events.emit('matchEnd', result)
       if (this.matchId) {
-        fetch('/api/score', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            matchId: this.matchId,
-            p1Score: result.playerScore,
-            p2Score: result.opponentScore,
-          }),
-        }).catch(() => {})
+        try {
+          const response = await fetch('/api/score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              matchId: this.matchId,
+              p1Score: result.playerScore,
+              p2Score: result.opponentScore,
+            }),
+          })
+          if (!response.ok) {
+            console.error('Failed to submit score')
+          }
+        } catch (error) {
+          console.error('Failed to submit score', error)
+        }
       }
     })
   }
