@@ -1,6 +1,25 @@
 import '@testing-library/jest-dom'
 import { afterEach, vi } from 'vitest'
 
+// Mock auth and redis modules used by API routes to avoid touching real
+// services during unit tests. Individual tests can adjust the behaviour of
+// these mocks as needed.
+vi.mock('@/lib/auth', () => ({
+  getServerAuthSession: vi.fn().mockResolvedValue({ user: { id: 'user-id' } }),
+}))
+
+vi.mock('@/lib/redis', () => {
+  const redis = {
+    incr: vi.fn().mockResolvedValue(1),
+    expire: vi.fn().mockResolvedValue(null),
+    lpop: vi.fn(),
+    rpush: vi.fn(),
+    set: vi.fn(),
+    del: vi.fn(),
+  }
+  return { redis }
+})
+
 afterEach(() => {
   vi.clearAllMocks()
 })
