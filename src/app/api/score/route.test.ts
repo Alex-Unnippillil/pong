@@ -7,6 +7,10 @@ vi.mock('../../../lib/prisma', () => ({
   },
 }))
 
+vi.mock('../../../lib/auth', () => ({
+  getServerAuthSession: vi.fn(() => Promise.resolve({ user: { id: 'u1' } })),
+}))
+
 import { prisma } from '../../../lib/prisma'
 
 describe('score API', () => {
@@ -40,5 +44,20 @@ describe('score API', () => {
     expect(res.status).toBe(400)
     expect(await res.json()).toEqual({ error: 'invalid' })
     expect(prisma.match.update).not.toHaveBeenCalled()
+  })
+
+  it('returns 500 on update failure', async () => {
+    const body = {
+      matchId: 'm1',
+      p1Score: 10,
+      p2Score: 5,
+      winnerId: 'p1',
+    }
+    vi.mocked(prisma.match.update).mockRejectedValueOnce(new Error('fail'))
+    const res = await POST(jsonRequest(body))
+    const json = await res.json()
+
+    expect(res.status).toBe(500)
+    expect(json).toEqual({ error: 'server error' })
   })
 })
