@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { redis } from '@/lib/redis'
 import { createRequire } from 'module'
+import { createHash } from 'node:crypto'
 
 const require = createRequire(import.meta.url)
 const { z } = require('zod')
@@ -29,7 +30,8 @@ export async function POST(req: Request) {
     req.headers.get('x-forwarded-for') ??
     req.headers.get('x-real-ip') ??
     'unknown'
-  const key = `telemetry:ip:${ip}`
+  const hashedIp = createHash('sha256').update(ip).digest('hex')
+  const key = `telemetry:ip:${hashedIp}`
   const count = await redis.incr(key)
   if (count === 1) {
     await redis.expire(key, RATE_LIMIT_WINDOW_SECONDS)
