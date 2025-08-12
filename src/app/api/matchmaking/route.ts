@@ -11,6 +11,9 @@ const bodySchema = z.object({
 
 export const runtime = 'nodejs'
 
+const QUEUE_KEY = 'matchmaking:queue'
+const QUEUE_TTL_SECONDS = 60
+
 export async function POST(req: Request) {
   const session = await getServerAuthSession()
   if (!session?.user) {
@@ -24,9 +27,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'invalid mode' }, { status: 400 })
     }
     const { mode } = parsed.data
-    const opponent = await redis.lpop<string>('matchmaking:queue')
-    if (!opponent) {
-      await redis.rpush('matchmaking:queue', userId)
+    const opponent = await redis.lpop<string>(QUEUE_KEY)
+    if (!opponent || opponent === userId) {
+      const alreadyQueued = await redis.lpos<number>(QUEUE_KEY, userId)
+      if (alreadyQueued === null) {
+        await redis.rpush(QUEUE_KEY, userId)
+      }
+      await redis.expire(QUEUE_KEY, QUEUE_TTL_SECONDS)
       return NextResponse.json({ queued: true })
     }
     const match = await prisma.match.create({
@@ -37,7 +44,7 @@ export async function POST(req: Request) {
       JSON.stringify({ p1: opponent, p2: userId }),
     )
     return NextResponse.json({ p1: opponent, p2: userId, matchId: match.id })
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'queue error' }, { status: 500 })
   }
 }

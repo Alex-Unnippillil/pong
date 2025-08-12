@@ -13,6 +13,7 @@ vi.mock('@/lib/redis', () => {
     incr: vi.fn().mockResolvedValue(1),
     expire: vi.fn().mockResolvedValue(null),
     lpop: vi.fn(),
+    lpos: vi.fn(),
     rpush: vi.fn(),
     set: vi.fn(),
     del: vi.fn(),
@@ -40,6 +41,5 @@ function jsonRequest(body: unknown, init: RequestInit = {}) {
 export {}
 
 declare global {
-  // eslint-disable-next-line no-var
   var jsonRequest: typeof jsonRequest
 }
