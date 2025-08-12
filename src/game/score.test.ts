@@ -17,4 +17,13 @@ describe('ScoreManager', () => {
       opponentScore: 0,
     })
   })
+
+  it('removes listeners when unsubscribe is called', () => {
+    const score = new ScoreManager(1)
+    const handler = vi.fn()
+    const unsubscribe = score.onMatchEnd(handler)
+    unsubscribe()
+    score.addPoint('player')
+    expect(handler).not.toHaveBeenCalled()
+  })
 })

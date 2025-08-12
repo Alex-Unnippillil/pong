@@ -10,7 +10,7 @@ vi.mock('phaser', () => {
       text: vi.fn(() => ({ setOrigin: vi.fn().mockReturnThis() })),
     }
     input = { keyboard: { createCursorKeys: vi.fn(() => ({})) } }
-    events = { emit: vi.fn() }
+    events = { emit: vi.fn(), once: vi.fn() }
     scale = { width: 800, height: 600 }
   }
   class Vector2 {
@@ -30,6 +30,7 @@ vi.mock('phaser', () => {
       Scene,
       Math: { Vector2 },
       Geom: { Intersects: { RectangleToRectangle: vi.fn() } },
+      Scenes: { Events: { DESTROY: 'destroy' } },
     },
   }
 })

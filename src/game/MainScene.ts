@@ -49,7 +49,7 @@ export default class MainScene extends Phaser.Scene {
       .text((width * 3) / 4, 20, '0', { color: '#fff', fontSize: '32px' })
       .setOrigin(0.5, 0.5)
 
-    this.score.onMatchEnd(async (result) => {
+    const unsubscribe = this.score.onMatchEnd(async (result) => {
       this.events.emit('matchEnd', result)
       if (this.matchId) {
         try {
@@ -70,6 +70,7 @@ export default class MainScene extends Phaser.Scene {
         }
       }
     })
+    this.events.once(Phaser.Scenes.Events.DESTROY, unsubscribe)
   }
 
   private resetBall(direction: number) {
