@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { getServerAuthSession } from '@/lib/auth'
+import { triggerLeaderboardRecalculation } from '@/lib/leaderboard'
 import { prisma } from '@/lib/prisma'
 
 const bodySchema = z.object({
@@ -22,9 +23,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'invalid' }, { status: 400 })
   }
   const { matchId, p1Score, p2Score, winnerId } = parsed.data
+
+  const match = await prisma.match.findUnique({
+    where: { id: matchId },
+  })
+  if (!match) {
+    return NextResponse.json({ error: 'not-found' }, { status: 404 })
+  }
+  if (session.user.id !== match.p1Id && session.user.id !== match.p2Id) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  }
+  if (match.endedAt) {
+    return NextResponse.json({ error: 'already-completed' }, { status: 409 })
+  }
+
   await prisma.match.update({
     where: { id: matchId },
     data: { p1Score, p2Score, winnerId, endedAt: new Date() },
   })
+  await triggerLeaderboardRecalculation()
   return NextResponse.json({ ok: true })
 }
