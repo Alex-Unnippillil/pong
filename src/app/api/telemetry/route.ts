@@ -6,7 +6,7 @@ import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
 const { z } = require('zod')
 
-const schema = z.object({
+export const schema = z.object({
   eventType: z.string(),
   payload: z
     .custom<Record<string, unknown>>(
