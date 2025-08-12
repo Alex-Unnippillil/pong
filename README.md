@@ -12,6 +12,15 @@ pnpm dev
 
 Copy `.env.example` to `.env.local` and fill in secrets.
 
+## Internationalization
+
+Translations are powered by [next-intl](https://github.com/amannn/next-intl).
+To add a new language:
+
+1. Create `src/locales/<locale>.json` with your strings.
+2. Add the locale to `next.config.ts` and `src/i18n.ts`.
+3. Use `useTranslations` in components: `const t = useTranslations(); t('title')`.
+
 ## Architecture Overview
 
 ```mermaid
@@ -30,4 +39,3 @@ graph LR
 - Ensure Postgres database is reachable via `DATABASE_URL`.
 - Run `pnpm prisma migrate dev` after changing the schema.
 - If Playwright tests fail, install browsers with `npx playwright install`.
-- Internationalization: currently only English is provided; add more locales under `src/locales/` as needed.

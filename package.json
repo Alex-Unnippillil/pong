@@ -21,6 +21,7 @@
     "@upstash/redis": "^1.35.3",
     "next": "15.4.6",
     "next-auth": "^4.24.11",
+    "next-intl": "^4.3.4",
     "phaser": "^3.90.0",
     "posthog-js": "^1.258.6",
     "react": "19.1.0",
