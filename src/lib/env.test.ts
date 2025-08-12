@@ -5,6 +5,8 @@ const originalEnv = process.env
 const baseEnv: NodeJS.ProcessEnv = {
   NEXT_PUBLIC_POSTHOG_KEY: 'ph_key',
   NEXT_PUBLIC_POSTHOG_HOST: 'https://app.posthog.com',
+  DATABASE_URL: 'postgresql://user:pass@localhost:5432/db',
+  NEXTAUTH_URL: 'http://localhost:3000',
   EMAIL_SERVER: 'smtp://user:pass@localhost',
   EMAIL_FROM: 'noreply@example.com',
   GITHUB_ID: 'id',
@@ -24,6 +26,12 @@ afterAll(() => {
 })
 
 describe('env validation', () => {
+  it('loads required variables', async () => {
+    const { env } = await import('./env')
+    expect(env.DATABASE_URL).toBe(baseEnv.DATABASE_URL)
+    expect(env.NEXTAUTH_URL).toBe(baseEnv.NEXTAUTH_URL)
+  })
+
   it('throws when required env var is missing', async () => {
     delete process.env.EMAIL_SERVER
     await expect(import('./env')).rejects.toThrow(/EMAIL_SERVER/)
@@ -32,5 +40,15 @@ describe('env validation', () => {
   it('throws when env var fails validation', async () => {
     process.env.UPSTASH_REDIS_URL = 'not-a-url'
     await expect(import('./env')).rejects.toThrow(/UPSTASH_REDIS_URL/)
+  })
+
+  it('throws when DATABASE_URL is missing', async () => {
+    delete process.env.DATABASE_URL
+    await expect(import('./env')).rejects.toThrow(/DATABASE_URL/)
+  })
+
+  it('throws when NEXTAUTH_URL is invalid', async () => {
+    process.env.NEXTAUTH_URL = 'invalid-url'
+    await expect(import('./env')).rejects.toThrow(/NEXTAUTH_URL/)
   })
 })
