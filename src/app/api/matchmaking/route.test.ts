@@ -43,6 +43,21 @@ describe('matchmaking API', () => {
     )
   })
 
+  it('defaults mode to classic when omitted', async () => {
+    sessionMock.mockResolvedValueOnce({ user: { id: 'u2' } })
+    vi.mocked(redis.lpop).mockResolvedValueOnce('u1')
+    vi.mocked(prisma.match.create).mockResolvedValueOnce({ id: 'm1' } as any)
+
+    const res = await POST(jsonRequest({}))
+    const json = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(json).toEqual({ p1: 'u1', p2: 'u2', matchId: 'm1' })
+    expect(prisma.match.create).toHaveBeenCalledWith({
+      data: { p1Id: 'u1', p2Id: 'u2', mode: 'classic', p1Score: 0, p2Score: 0 },
+    })
+  })
+
   it('returns 401 for unauthenticated users', async () => {
     sessionMock.mockResolvedValueOnce(null)
 
@@ -61,5 +76,15 @@ describe('matchmaking API', () => {
 
     expect(res.status).toBe(500)
     expect(await res.json()).toEqual({ error: 'queue error' })
+  })
+
+  it('rejects invalid modes', async () => {
+    sessionMock.mockResolvedValueOnce({ user: { id: 'u1' } })
+
+    const res = await POST(jsonRequest({ mode: 'invalid' }))
+
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'invalid mode' })
+    expect(redis.lpop).not.toHaveBeenCalled()
   })
 })
