@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { getServerAuthSession } from '@/lib/auth'
 import { redis } from '@/lib/redis'
 import { prisma } from '@/lib/prisma'
+import { env } from '@/lib/env'
 
 const bodySchema = z.object({
   mode: z.enum(['classic']).default('classic'),
@@ -12,7 +13,6 @@ const bodySchema = z.object({
 export const runtime = 'nodejs'
 
 const QUEUE_KEY = 'matchmaking:queue'
-const QUEUE_TTL_SECONDS = 60
 
 export async function POST(req: Request) {
   const session = await getServerAuthSession()
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       if (alreadyQueued === null) {
         await redis.rpush(QUEUE_KEY, userId)
       }
-      await redis.expire(QUEUE_KEY, QUEUE_TTL_SECONDS)
+      await redis.expire(QUEUE_KEY, env.MATCHMAKING_QUEUE_TTL_SECONDS)
       return NextResponse.json({ queued: true })
     }
     const match = await prisma.match.create({
