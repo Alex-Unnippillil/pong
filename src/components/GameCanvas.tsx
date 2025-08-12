@@ -2,54 +2,13 @@
 
 import { useEffect, useRef } from 'react'
 
-import MainScene from '../game/MainScene'
+import { usePhaserGame } from '../hooks/usePhaserGame'
 import { useSettings } from '../store/settings'
-
-type Phaser = typeof import('phaser')
 
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const gameRef = useRef<Phaser.Game | null>(null)
   const muted = useSettings((s) => s.muted)
-
-  useEffect(() => {
-    if (!containerRef.current) return
-
-    let ignore = false
-
-    const init = async () => {
-      const Phaser: Phaser = await import('phaser')
-
-      const config: Phaser.Types.Core.GameConfig = {
-        type: Phaser.AUTO,
-        parent: containerRef.current!,
-        width: containerRef.current!.clientWidth,
-        height: containerRef.current!.clientHeight,
-        scene: MainScene,
-      }
-
-      if (ignore) return
-
-      const game = new Phaser.Game(config)
-      game.sound.mute = muted
-      gameRef.current = game
-    }
-
-    init()
-
-    return () => {
-      ignore = true
-      gameRef.current?.destroy(true)
-      gameRef.current = null
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    if (gameRef.current) {
-      gameRef.current.sound.mute = muted
-    }
-  }, [muted])
+  const gameRef = usePhaserGame(containerRef, muted)
 
   useEffect(() => {
     const handleResize = () => {

@@ -1,38 +1,41 @@
 import React from 'react'
 ;(globalThis as unknown as { React: typeof React }).React = React
-import { render, waitFor } from '@testing-library/react'
+import { act, render, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
 
+var Game: any
+
 vi.mock('phaser', () => {
-  class Game {
-    canvas: HTMLCanvasElement
-    scale = {
+  Game = vi.fn(function (
+    this: any,
+    config: { parent?: HTMLElement; width: number; height: number },
+  ) {
+    this.canvas = document.createElement('canvas')
+    this.canvas.width = config.width
+    this.canvas.height = config.height
+    if (config.parent) {
+      config.parent.appendChild(this.canvas)
+    }
+    this.scale = {
       resize: (width: number, height: number) => {
         this.canvas.width = width
         this.canvas.height = height
       },
     }
-    sound = { mute: false }
-    constructor(config: {
-      parent?: HTMLElement
-      width: number
-      height: number
-    }) {
-      this.canvas = document.createElement('canvas')
-      this.canvas.width = config.width
-      this.canvas.height = config.height
-      if (config.parent) {
-        config.parent.appendChild(this.canvas)
-      }
-    }
-    destroy() {}
-  }
+    this.sound = { mute: false }
+    this.destroy = vi.fn()
+  })
   class Scene {}
   const PhaserMock = { AUTO: 0, Game, Scene }
   return { __esModule: true, default: PhaserMock, ...PhaserMock }
 })
 
 import { GameCanvas } from './GameCanvas'
+import { useSettings } from '../store/settings'
+
+beforeEach(() => {
+  Game.mockClear()
+})
 
 describe('GameCanvas', () => {
   it('resizes canvas when window resizes', async () => {
@@ -70,6 +73,31 @@ describe('GameCanvas', () => {
     await waitFor(() => {
       expect(canvas.width).toBe(200)
       expect(canvas.height).toBe(150)
+    })
+  })
+
+  it('initializes once and responds to muted changes', async () => {
+    render(<GameCanvas />)
+
+    await waitFor(() => {
+      expect(Game).toHaveBeenCalledTimes(1)
+    })
+
+    act(() => {
+      useSettings.getState().toggleMuted()
+    })
+
+    await waitFor(() => {
+      expect(Game).toHaveBeenCalledTimes(1)
+      expect((Game.mock.instances[0] as any).sound.mute).toBe(true)
+    })
+
+    act(() => {
+      useSettings.getState().toggleMuted()
+    })
+
+    await waitFor(() => {
+      expect((Game.mock.instances[0] as any).sound.mute).toBe(false)
     })
   })
 })
