@@ -11,6 +11,7 @@ pnpm dev
 ```
 
 Copy `.env.example` to `.env.local` and fill in secrets.
+Use the `UPSTASH_REDIS_URL` and `UPSTASH_REDIS_TOKEN` variables for Upstash Redis and update your deployment secrets to match.
 
 ## Architecture Overview
 
