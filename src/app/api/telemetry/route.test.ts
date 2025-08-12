@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
 
-
 vi.mock('../../../lib/prisma', () => ({
   prisma: {
     telemetry: {
@@ -17,6 +16,10 @@ vi.mock('../../../lib/redis', () => ({
   },
 }))
 
+import { GET, POST } from './route'
+import { prisma } from '../../../lib/prisma'
+import { redis } from '../../../lib/redis'
+import { z } from 'zod'
 
 describe('telemetry API', () => {
   it('fails payload validation for oversized payload', () => {
