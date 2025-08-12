@@ -3,6 +3,7 @@ import Script from 'next/script'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { AnalyticsProvider } from '../components/AnalyticsProvider'
+import { AuthButtons } from '../components/AuthButtons'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getLocale, getTranslations } from 'next-intl/server'
 
@@ -39,6 +40,9 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AnalyticsProvider />
+          <header className="p-4">
+            <AuthButtons />
+          </header>
           {children}
         </NextIntlClientProvider>
         <Script id="sw" strategy="afterInteractive">
