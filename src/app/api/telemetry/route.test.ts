@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
-
+import { createHash } from 'node:crypto'
+import { z } from 'zod'
 
 vi.mock('../../../lib/prisma', () => ({
   prisma: {
@@ -17,6 +18,9 @@ vi.mock('../../../lib/redis', () => ({
   },
 }))
 
+import { POST, GET } from './route'
+import { prisma } from '../../../lib/prisma'
+import { redis } from '../../../lib/redis'
 
 describe('telemetry API', () => {
   it('fails payload validation for oversized payload', () => {
@@ -67,6 +71,22 @@ describe('telemetry API', () => {
         createdAt: sinceDate.toISOString(),
       },
     ])
+  })
+
+  it('hashes ip before using rate limit key', async () => {
+    const ip = '1.2.3.4'
+    await POST(
+      jsonRequest(
+        { eventType: 'start', payload: {} },
+        {
+          headers: { 'x-forwarded-for': ip },
+        },
+      ),
+    )
+
+    const hashed = createHash('sha256').update(ip).digest('hex')
+    expect(redis.incr).toHaveBeenCalledWith(`telemetry:ip:${hashed}`)
+    expect(redis.expire).toHaveBeenCalledWith(`telemetry:ip:${hashed}`, 60)
   })
 
   it('rate limits when exceeding allowed requests', async () => {
