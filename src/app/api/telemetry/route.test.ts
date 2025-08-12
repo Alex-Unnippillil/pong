@@ -1,11 +1,24 @@
 import { describe, it, expect, vi } from 'vitest'
 import { POST } from './route'
 
-vi.mock('../../../lib/prisma', () => ({
-  prisma: {
+interface PrismaMock {
+  telemetry: {
+    create: (args: {
+      data: {
+        eventType: string
+        payload: unknown
+        userId?: string
+      }
+    }) => unknown
+  }
+}
+
+vi.mock('../../../lib/prisma', () => {
+  const prisma: PrismaMock = {
     telemetry: { create: vi.fn() },
-  },
-}))
+  }
+  return { prisma }
+})
 
 import { prisma } from '../../../lib/prisma'
 

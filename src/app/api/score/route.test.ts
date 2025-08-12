@@ -1,11 +1,26 @@
 import { describe, it, expect, vi } from 'vitest'
 import { POST } from './route'
 
-vi.mock('../../../lib/prisma', () => ({
-  prisma: {
+interface PrismaMock {
+  match: {
+    update: (args: {
+      where: { id: string }
+      data: {
+        p1Score: number
+        p2Score: number
+        winnerId: string
+        endedAt: Date
+      }
+    }) => unknown
+  }
+}
+
+vi.mock('../../../lib/prisma', () => {
+  const prisma: PrismaMock = {
     match: { update: vi.fn() },
-  },
-}))
+  }
+  return { prisma }
+})
 
 import { prisma } from '../../../lib/prisma'
 
