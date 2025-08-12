@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createHash } from 'node:crypto'
-import { z } from 'zod'
 
 vi.mock('../../../lib/prisma', () => ({
   prisma: {
@@ -18,7 +17,7 @@ vi.mock('../../../lib/redis', () => ({
   },
 }))
 
-import { POST, GET } from './route'
+import { POST, GET, telemetrySchema } from './route'
 import { prisma } from '../../../lib/prisma'
 import { redis } from '../../../lib/redis'
 
@@ -27,23 +26,7 @@ describe('telemetry API', () => {
     const payload = Object.fromEntries(
       Array.from({ length: 51 }, (_, i) => [`k${i}`, i]),
     )
-    const schema = z.object({
-      eventType: z.string(),
-      payload: z
-        .custom<Record<string, unknown>>(
-          (val) =>
-            typeof val === 'object' && val !== null && !Array.isArray(val),
-        )
-        .refine((val) => Object.keys(val).length <= 50, {
-          message: 'payload too large',
-        })
-        .refine((val) => JSON.stringify(val).length <= 1000, {
-          message: 'payload too large',
-        }),
-      userId: z.string().optional(),
-    })
-
-    const result = schema.safeParse({ eventType: 'start', payload })
+    const result = telemetrySchema.safeParse({ eventType: 'start', payload })
     expect(result.success).toBe(false)
   })
 
