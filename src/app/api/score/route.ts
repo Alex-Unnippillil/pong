@@ -7,9 +7,8 @@ import { prisma } from '@/lib/prisma'
 
 const bodySchema = z.object({
   matchId: z.string(),
-  p1Score: z.number(),
-  p2Score: z.number(),
-  winnerId: z.string(),
+  p1Score: z.number().int().nonnegative(),
+  p2Score: z.number().int().nonnegative(),
 })
 
 export async function POST(req: Request) {
@@ -22,7 +21,7 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'invalid' }, { status: 400 })
   }
-  const { matchId, p1Score, p2Score, winnerId } = parsed.data
+  const { matchId, p1Score, p2Score } = parsed.data
 
   const match = await prisma.match.findUnique({
     where: { id: matchId },
@@ -36,6 +35,12 @@ export async function POST(req: Request) {
   if (match.endedAt) {
     return NextResponse.json({ error: 'already-completed' }, { status: 409 })
   }
+
+  if (p1Score === p2Score) {
+    return NextResponse.json({ error: 'invalid-score' }, { status: 400 })
+  }
+
+  const winnerId = p1Score > p2Score ? match.p1Id : match.p2Id
 
   await prisma.match.update({
     where: { id: matchId },
