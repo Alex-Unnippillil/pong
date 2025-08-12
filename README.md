@@ -12,6 +12,22 @@ pnpm dev
 
 Copy `.env.example` to `.env.local` and fill in secrets.
 
+### Environment Variables
+
+The application expects the following environment variables in `.env.local`:
+
+- `DATABASE_URL` – connection string for the Postgres database.
+- `AUTH_SECRET` – secret used by NextAuth.
+- `EMAIL_SERVER` – SMTP connection string for outgoing mail.
+- `EMAIL_FROM` – email address used as the sender.
+- `GITHUB_ID` / `GITHUB_SECRET` – GitHub OAuth credentials.
+- `GOOGLE_ID` / `GOOGLE_SECRET` – Google OAuth credentials.
+- `UPSTASH_REDIS_URL` / `UPSTASH_REDIS_TOKEN` – Upstash Redis credentials.
+- `NEXT_PUBLIC_POSTHOG_KEY` – PostHog API key.
+- `NEXT_PUBLIC_POSTHOG_HOST` – PostHog API host.
+- `SUPABASE_URL` / `SUPABASE_KEY` – Supabase project credentials.
+- `NEXTAUTH_URL` – canonical URL of your site for NextAuth callbacks.
+
 ## Architecture Overview
 
 ```mermaid
