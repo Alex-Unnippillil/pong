@@ -36,7 +36,6 @@ describe('score API', () => {
       matchId: 'm1',
       p1Score: 10,
       p2Score: 5,
-      winnerId: 'p1',
     }
 
     const res = await POST(jsonRequest(body))
@@ -81,7 +80,6 @@ describe('score API', () => {
       matchId: 'm1',
       p1Score: 10,
       p2Score: 5,
-      winnerId: 'p1',
     }
 
     const res = await POST(jsonRequest(body))
@@ -105,13 +103,35 @@ describe('score API', () => {
       matchId: 'm1',
       p1Score: 10,
       p2Score: 5,
-      winnerId: 'p1',
     }
 
     const res = await POST(jsonRequest(body))
 
     expect(res.status).toBe(409)
     expect(await res.json()).toEqual({ error: 'already-completed' })
+    expect(prisma.match.update).not.toHaveBeenCalled()
+    expect(triggerLeaderboardRecalculation).not.toHaveBeenCalled()
+  })
+
+  it('rejects tie score', async () => {
+    vi.mocked(getServerAuthSession).mockResolvedValue({ user: { id: 'p1' } })
+    prisma.match.findUnique.mockResolvedValue({
+      id: 'm1',
+      p1Id: 'p1',
+      p2Id: 'p2',
+      endedAt: null,
+    })
+
+    const body = {
+      matchId: 'm1',
+      p1Score: 10,
+      p2Score: 10,
+    }
+
+    const res = await POST(jsonRequest(body))
+
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'invalid-score' })
     expect(prisma.match.update).not.toHaveBeenCalled()
     expect(triggerLeaderboardRecalculation).not.toHaveBeenCalled()
   })
