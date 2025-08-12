@@ -35,5 +35,8 @@ export class ScoreManager {
 
   onMatchEnd(cb: (result: MatchResult) => void) {
     this.listeners.push(cb)
+    return () => {
+      this.listeners = this.listeners.filter((l) => l !== cb)
+    }
   }
 }
