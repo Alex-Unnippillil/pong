@@ -9,6 +9,7 @@ applications:
         preBuild:
           commands:
             - pnpm install
+            - npx prisma generate
         build:
           commands:
             - pnpm build
