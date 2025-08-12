@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest'
-import { POST } from './route'
 
 vi.mock('../../../lib/prisma', () => ({
   prisma: {
@@ -7,6 +6,28 @@ vi.mock('../../../lib/prisma', () => ({
   },
 }))
 
+vi.mock('../../../lib/redis', () => ({
+  redis: {
+    incr: vi.fn().mockResolvedValue(1),
+    expire: vi.fn(),
+  },
+}))
+
+vi.mock('zod', () => ({
+  z: {
+    object: () => ({
+      safeParse: (val: unknown) =>
+        (val as { eventType?: unknown }).eventType
+          ? { success: true, data: val }
+          : { success: false },
+    }),
+    string: () => ({ optional: () => ({}) }),
+    any: () => ({}),
+    record: () => ({ refine: () => ({ refine: () => ({}) }) }),
+  },
+}))
+
+import { POST } from './route'
 import { prisma } from '../../../lib/prisma'
 
 describe('telemetry API', () => {

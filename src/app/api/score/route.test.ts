@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest'
-import { POST } from './route'
 
 vi.mock('../../../lib/prisma', () => ({
   prisma: {
@@ -7,6 +6,11 @@ vi.mock('../../../lib/prisma', () => ({
   },
 }))
 
+vi.mock('../../../lib/auth', () => ({
+  getServerAuthSession: vi.fn(() => Promise.resolve({ user: { id: 'u1' } })),
+}))
+
+import { POST } from './route'
 import { prisma } from '../../../lib/prisma'
 
 describe('score API', () => {
