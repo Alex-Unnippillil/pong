@@ -6,7 +6,8 @@ import { redis } from '@/lib/redis'
 const schema = z.object({
   eventType: z.string(),
   payload: z
-    .record(z.any())
+    .object({})
+    .catchall(z.any())
     .refine((val) => Object.keys(val).length <= 50, {
       message: 'payload too large',
     })
@@ -17,9 +18,12 @@ const schema = z.object({
 })
 
 export async function POST(req: Request) {
+  const forwardedFor = req.headers.get('x-forwarded-for')
   const ip =
-    req.headers.get('x-forwarded-for') ??
-    req.headers.get('x-real-ip') ??
+    forwardedFor?.split(',')[0].trim() ||
+    req.headers.get('x-real-ip') ||
+    // @ts-expect-error - ip is available on NextRequest
+    (req as any).ip ||
     'unknown'
   const key = `telemetry:ip:${ip}`
   const count = await redis.incr(key)
@@ -44,6 +48,11 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
+  const apiKey = process.env.TELEMETRY_API_KEY
+  if (apiKey && req.headers.get('x-api-key') !== apiKey) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
+
   const { searchParams } = new URL(req.url)
   const eventType = searchParams.get('eventType')
   const since = searchParams.get('since')
