@@ -1,8 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
 
-vi.mock('zod', () => require('zod'))
 
 vi.mock('../../../lib/prisma', () => ({
   prisma: {
@@ -20,10 +17,6 @@ vi.mock('../../../lib/redis', () => ({
   },
 }))
 
-const { POST, GET } = await import('./route')
-const { prisma } = await import('../../../lib/prisma')
-const { redis } = await import('../../../lib/redis')
-const { z } = require('zod')
 
 describe('telemetry API', () => {
   it('fails payload validation for oversized payload', () => {
