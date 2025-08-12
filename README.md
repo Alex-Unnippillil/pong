@@ -46,6 +46,12 @@ graph LR
   C --> E[(Upstash Redis)]
 ```
 
+## Background jobs
+
+When a match score is reported, a message is published to the `leaderboard:recalc`
+Redis channel. A separate worker can subscribe to this channel and rebuild the
+leaderboard asynchronously.
+
 ## Offline Testing
 
 To verify the service worker's offline cache:

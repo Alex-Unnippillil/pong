@@ -1,3 +1,6 @@
+import { redis } from '@/lib/redis'
+
 export async function triggerLeaderboardRecalculation() {
-  // placeholder for job queueing to recalc leaderboard
+  // enqueue a timestamp so a worker can recompute the leaderboard
+  await redis.publish('leaderboard:recalc', Date.now().toString())
 }
