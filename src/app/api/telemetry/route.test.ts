@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest'
-import { POST } from './route'
 
 vi.mock('../../../lib/prisma', () => ({
   prisma: {
@@ -7,12 +6,21 @@ vi.mock('../../../lib/prisma', () => ({
   },
 }))
 
+vi.mock('../../../lib/redis', () => ({
+  redis: {
+    incr: vi.fn(async () => 1),
+    expire: vi.fn(),
+  },
+}))
+
+import { POST } from './route'
 import { prisma } from '../../../lib/prisma'
+import { redis } from '../../../lib/redis'
 
 describe('telemetry API', () => {
-  it('stores telemetry events', async () => {
-    const body = { eventType: 'start', payload: { foo: 'bar' }, userId: 'u1' }
+  const body = { eventType: 'start', payload: { foo: 'bar' }, userId: 'u1' }
 
+  it('stores telemetry events', async () => {
     const res = await POST(jsonRequest(body))
     const json = await res.json()
 
@@ -25,7 +33,14 @@ describe('telemetry API', () => {
     const res = await POST(jsonRequest({}))
 
     expect(res.status).toBe(400)
-    expect(await res.json()).toEqual({ error: 'invalid' })
+    expect(await res.json()).toEqual({ ok: false, error: 'invalid' })
     expect(prisma.telemetry.create).not.toHaveBeenCalled()
+  })
+
+  it('rate limits excessive requests', async () => {
+    ;(redis.incr as any).mockResolvedValueOnce(61)
+    const res = await POST(jsonRequest(body))
+    expect(res.status).toBe(429)
+    expect(await res.json()).toEqual({ ok: false, error: 'rate limited' })
   })
 })

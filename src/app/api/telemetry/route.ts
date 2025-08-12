@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { redis } from '@/lib/redis'
+import { error, parseBody } from '@/utils/api'
 
 const schema = z.object({
   eventType: z.string(),
   payload: z
-    .record(z.any())
+    .record(z.string(), z.any())
     .refine((val) => Object.keys(val).length <= 50, {
       message: 'payload too large',
     })
@@ -27,18 +28,15 @@ export async function POST(req: Request) {
     await redis.expire(key, 60)
   }
   if (count > 60) {
-    return NextResponse.json({ error: 'rate limited' }, { status: 429 })
+    return error(429, 'rate limited')
   }
-  const json = await req.json()
-  const parsed = schema.safeParse(json)
-  if (!parsed.success) {
-    return NextResponse.json({ error: 'invalid' }, { status: 400 })
-  }
+  const [body, bodyErr] = await parseBody(schema, req)
+  if (bodyErr) return bodyErr
   try {
-    await prisma.telemetry.create({ data: parsed.data })
+    await prisma.telemetry.create({ data: body! })
   } catch (err) {
     console.error('telemetry insert failed', err)
-    return NextResponse.json({ error: 'server error' }, { status: 500 })
+    return error(500, 'server error')
   }
   return NextResponse.json({ ok: true })
 }
@@ -57,11 +55,14 @@ export async function GET(req: Request) {
     }
   }
 
-  const data = await prisma.telemetry.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    take: 100,
-  })
-
-  return NextResponse.json(data)
+  try {
+    const data = await prisma.telemetry.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    })
+    return NextResponse.json(data)
+  } catch {
+    return error(500, 'server error')
+  }
 }
