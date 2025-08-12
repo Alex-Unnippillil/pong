@@ -49,6 +49,7 @@ model Leaderboard {
   losses    Int    @default(0)
   streak    Int    @default(0)
   updatedAt DateTime @updatedAt
+  @@index([elo])
 }
 
 model Telemetry {
