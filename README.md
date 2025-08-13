@@ -55,7 +55,16 @@ leaderboard asynchronously.
 
 ## Offline Testing
 
-To verify the service worker's offline cache:
+The Playwright suite includes an automated offline test:
+
+```bash
+pnpm e2e --browser=chromium
+```
+
+It launches the app, waits for the service worker to register, disables
+network access, and ensures the `GameCanvas` continues animating.
+
+To verify manually:
 
 1. Run `pnpm dev` and open the app in your browser.
 2. In DevTools, confirm the service worker is registered under **Application → Service Workers**.

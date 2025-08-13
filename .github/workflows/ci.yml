@@ -23,4 +23,5 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
-      - run: pnpm e2e -- --browser=chromium || true
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e --browser=chromium
