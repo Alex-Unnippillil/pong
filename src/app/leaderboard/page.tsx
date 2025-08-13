@@ -1,6 +1,5 @@
 import React from 'react'
-import { prisma } from '@/lib/prisma'
-import { leaderboardQueryOptions } from '@/app/api/leaderboard/route'
+import prisma from '@/lib/prisma'
 
 interface LeaderboardEntry {
   userId: string
@@ -14,9 +13,11 @@ interface LeaderboardEntry {
 
 export default async function LeaderboardPage() {
   try {
-    const data: LeaderboardEntry[] = await prisma.leaderboard.findMany(
-      leaderboardQueryOptions,
-    )
+    const data: LeaderboardEntry[] = await prisma.leaderboard.findMany({
+      take: 10,
+      orderBy: { elo: 'desc' },
+      include: { user: true },
+    })
 
     return (
       <main className="p-8">
@@ -46,7 +47,7 @@ export default async function LeaderboardPage() {
       </main>
     )
   } catch (error) {
-    console.error('Failed to load leaderboard:', error)
+    console.error('Failed to load leaderboard from database:', error)
     return (
       <main className="p-8">
         <h1 className="mb-4 text-3xl font-bold">Leaderboard</h1>
