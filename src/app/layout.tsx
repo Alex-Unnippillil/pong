@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { AnalyticsProvider } from '../components/AnalyticsProvider'
 import { AuthButtons } from '../components/AuthButtons'
+import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import { MuteButton } from '../components/MuteButton'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getLocale, getTranslations } from 'next-intl/server'
@@ -43,6 +44,7 @@ export default async function RootLayout({
           <AnalyticsProvider />
           <header className="p-4 flex gap-2">
             <AuthButtons />
+            <LanguageSwitcher />
             <MuteButton />
           </header>
           {children}
