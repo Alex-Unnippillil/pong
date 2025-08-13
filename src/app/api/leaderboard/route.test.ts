@@ -8,7 +8,7 @@ vi.mock('@/lib/prisma', () => ({
   },
 }))
 
-import { GET } from './route'
+import { GET, leaderboardQueryOptions } from './route'
 import { prisma } from '@/lib/prisma'
 
 describe('leaderboard API', () => {
@@ -18,13 +18,16 @@ describe('leaderboard API', () => {
       { id: '2', elo: 900, user: { id: 'u2', name: 'Bob' } },
     ]
 
-    prisma.leaderboard.findMany.mockResolvedValue(sample as any)
+    prisma.leaderboard.findMany.mockResolvedValue(sample)
 
     const res = await GET()
     const json = await res.json()
 
     expect(res.status).toBe(200)
     expect(json).toEqual(sample)
+    expect(prisma.leaderboard.findMany).toHaveBeenCalledWith(
+      leaderboardQueryOptions,
+    )
   })
 
   it('returns 500 on query failure', async () => {

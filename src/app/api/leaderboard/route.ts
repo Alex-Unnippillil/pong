@@ -9,7 +9,10 @@ export const leaderboardQueryOptions = {
 
 export async function GET() {
   try {
-
+    const leaderboard = await prisma.leaderboard.findMany(
+      leaderboardQueryOptions,
+    )
+    return ok(leaderboard)
   } catch {
     return error('server error', 500)
   }
