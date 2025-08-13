@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { redis } from '@/lib/redis'
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
+import { ok, error } from '@/lib/api-response'
 
 export const telemetrySchema = z.object({
   eventType: z.string(),
@@ -34,12 +34,12 @@ export async function POST(req: Request) {
     await redis.expire(key, RATE_LIMIT_WINDOW_SECONDS)
   }
   if (count > RATE_LIMIT_MAX_REQUESTS) {
-    return NextResponse.json({ error: 'rate limited' }, { status: 429 })
+    return error('rate limited', 429)
   }
   const json = await req.json()
   const parsed = telemetrySchema.safeParse(json)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'invalid' }, { status: 400 })
+    return error('invalid', 400)
   }
   try {
     await prisma.telemetry.create({ data: parsed.data })
@@ -47,9 +47,9 @@ export async function POST(req: Request) {
     console.warn('telemetry insert failed', {
       error: err instanceof Error ? err.message : String(err),
     })
-    return NextResponse.json({ error: 'server error' }, { status: 500 })
+    return error('server error', 500)
   }
-  return NextResponse.json({ ok: true })
+  return ok({ ok: true })
 }
 
 export async function GET(req: Request) {
@@ -62,7 +62,7 @@ export async function GET(req: Request) {
   if (since) {
     const date = new Date(since)
     if (isNaN(date.getTime())) {
-      return NextResponse.json({ error: 'invalid since' }, { status: 400 })
+      return error('invalid since', 400)
     }
     where.createdAt = { gte: date }
   }
@@ -73,5 +73,5 @@ export async function GET(req: Request) {
     take: 100,
   })
 
-  return NextResponse.json(data)
+  return ok(data)
 }

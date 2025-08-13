@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { ok, error } from '@/lib/api-response'
 
 export async function GET() {
   try {
@@ -8,8 +8,8 @@ export async function GET() {
       orderBy: { elo: 'desc' },
       include: { user: true },
     })
-    return NextResponse.json(data)
+    return ok(data)
   } catch {
-    return NextResponse.json({ error: 'server error' }, { status: 500 })
+    return error('server error', 500)
   }
 }
