@@ -1,4 +1,7 @@
 import Phaser from 'phaser'
+import type { RealtimeChannel } from '@supabase/supabase-js'
+
+import { supabase } from '@/lib/supabase'
 import { aiMove, movePaddle } from './paddle'
 import { ScoreManager, Side } from './score'
 
@@ -14,6 +17,11 @@ export default class MainScene extends Phaser.Scene {
   private paddleHeight = 100
   private score = new ScoreManager()
   private matchId?: string
+  private channel?: RealtimeChannel
+  private remotePaddleY: number | null = null
+  private remoteBall: { x: number; y: number; vx: number; vy: number } | null =
+    null
+  private lastRemoteUpdate = 0
 
   constructor(matchId?: string) {
     super('MainScene')
@@ -49,7 +57,7 @@ export default class MainScene extends Phaser.Scene {
       .text((width * 3) / 4, 20, '0', { color: '#fff', fontSize: '32px' })
       .setOrigin(0.5, 0.5)
 
-    const unsubscribe = this.score.onMatchEnd(async (result) => {
+    const unsubscribeScore = this.score.onMatchEnd(async (result) => {
       this.events.emit('matchEnd', result)
       if (this.matchId) {
         try {
@@ -70,7 +78,27 @@ export default class MainScene extends Phaser.Scene {
         }
       }
     })
-    this.events.once(Phaser.Scenes.Events.DESTROY, unsubscribe)
+
+    if (this.matchId && supabase) {
+      this.channel = supabase
+        .channel(`match:${this.matchId}`)
+        .on('broadcast', { event: 'state' }, ({ payload }) => {
+          this.remotePaddleY = payload.paddleY
+          this.remoteBall = {
+            x: payload.ballX,
+            y: payload.ballY,
+            vx: payload.velX,
+            vy: payload.velY,
+          }
+          this.lastRemoteUpdate = Date.now()
+        })
+      void this.channel.subscribe()
+    }
+
+    this.events.once(Phaser.Scenes.Events.DESTROY, () => {
+      unsubscribeScore()
+      this.channel?.unsubscribe()
+    })
   }
 
   private resetBall(direction: number) {
@@ -87,6 +115,8 @@ export default class MainScene extends Phaser.Scene {
 
   update(_time: number, delta: number) {
     const dt = delta / 1000
+    const now = Date.now()
+    const hasRemote = now - this.lastRemoteUpdate < 1000
 
     if (this.cursors.up?.isDown) {
       this.player.y = movePaddle(
@@ -108,17 +138,31 @@ export default class MainScene extends Phaser.Scene {
       )
     }
 
-    this.opponent.y = aiMove(
-      this.opponent.y,
-      this.ball.y,
-      this.paddleSpeed,
-      dt,
-      this.scale.height,
-      this.paddleHeight,
-    )
+    if (hasRemote && this.remotePaddleY !== null) {
+      this.opponent.y = Phaser.Math.Linear(
+        this.opponent.y,
+        this.remotePaddleY,
+        0.2,
+      )
+    } else {
+      this.opponent.y = aiMove(
+        this.opponent.y,
+        this.ball.y,
+        this.paddleSpeed,
+        dt,
+        this.scale.height,
+        this.paddleHeight,
+      )
+    }
 
     this.ball.x += this.velocity.x * dt
     this.ball.y += this.velocity.y * dt
+
+    if (hasRemote && this.remoteBall) {
+      this.ball.x = Phaser.Math.Linear(this.ball.x, this.remoteBall.x, 0.2)
+      this.ball.y = Phaser.Math.Linear(this.ball.y, this.remoteBall.y, 0.2)
+      this.velocity.set(this.remoteBall.vx, this.remoteBall.vy)
+    }
 
     if (this.ball.y <= 0 || this.ball.y >= this.scale.height) {
       this.velocity.y *= -1
@@ -148,5 +192,17 @@ export default class MainScene extends Phaser.Scene {
         this.velocity.x = -Math.abs(this.velocity.x)
       }
     }
+
+    void this.channel?.send({
+      type: 'broadcast',
+      event: 'state',
+      payload: {
+        paddleY: this.player.y,
+        ballX: this.ball.x,
+        ballY: this.ball.y,
+        velX: this.velocity.x,
+        velY: this.velocity.y,
+      },
+    })
   }
 }
