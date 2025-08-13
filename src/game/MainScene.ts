@@ -18,14 +18,17 @@ export default class MainScene extends Phaser.Scene {
   private score = new ScoreManager()
   private matchId?: string
   private channel?: RealtimeChannel
+  private spectatorChannel?: RealtimeChannel
+  private spectator = false
   private remotePaddleY: number | null = null
   private remoteBall: { x: number; y: number; vx: number; vy: number } | null =
     null
   private lastRemoteUpdate = 0
 
-  constructor(matchId?: string) {
+  constructor(matchId?: string, spectator = false) {
     super('MainScene')
     this.matchId = matchId
+    this.spectator = spectator
   }
 
   preload() {
@@ -80,24 +83,62 @@ export default class MainScene extends Phaser.Scene {
     })
 
     if (this.matchId && supabase) {
-      this.channel = supabase
-        .channel(`match:${this.matchId}`)
-        .on('broadcast', { event: 'state' }, ({ payload }) => {
-          this.remotePaddleY = payload.paddleY
-          this.remoteBall = {
-            x: payload.ballX,
-            y: payload.ballY,
-            vx: payload.velX,
-            vy: payload.velY,
+      if (this.spectator) {
+        this.channel = supabase
+          .channel(`match:${this.matchId}:spectate`)
+          .on('broadcast', { event: 'state' }, ({ payload }) => {
+            this.remotePaddleY = payload.paddleY
+            this.remoteBall = {
+              x: payload.ballX,
+              y: payload.ballY,
+              vx: payload.velX,
+              vy: payload.velY,
+            }
+            this.lastRemoteUpdate = Date.now()
+          })
+        void this.channel.subscribe((status) => {
+          if (
+            status === 'CHANNEL_ERROR' ||
+            status === 'TIMED_OUT' ||
+            status === 'CLOSED'
+          ) {
+            this.events.emit('channelDisconnect')
           }
-          this.lastRemoteUpdate = Date.now()
         })
-      void this.channel.subscribe()
+      } else {
+        this.channel = supabase
+          .channel(`match:${this.matchId}`)
+          .on('broadcast', { event: 'state' }, ({ payload }) => {
+            this.remotePaddleY = payload.paddleY
+            this.remoteBall = {
+              x: payload.ballX,
+              y: payload.ballY,
+              vx: payload.velX,
+              vy: payload.velY,
+            }
+            this.lastRemoteUpdate = Date.now()
+          })
+        void this.channel.subscribe((status) => {
+          if (
+            status === 'CHANNEL_ERROR' ||
+            status === 'TIMED_OUT' ||
+            status === 'CLOSED'
+          ) {
+            this.events.emit('channelDisconnect')
+          }
+        })
+
+        this.spectatorChannel = supabase.channel(
+          `match:${this.matchId}:spectate`,
+        )
+        void this.spectatorChannel.subscribe()
+      }
     }
 
     this.events.once(Phaser.Scenes.Events.DESTROY, () => {
       unsubscribeScore()
       this.channel?.unsubscribe()
+      this.spectatorChannel?.unsubscribe()
     })
   }
 
@@ -118,41 +159,62 @@ export default class MainScene extends Phaser.Scene {
     const now = Date.now()
     const hasRemote = now - this.lastRemoteUpdate < 1000
 
-    if (this.cursors.up?.isDown) {
-      this.player.y = movePaddle(
-        this.player.y,
-        -1,
-        this.paddleSpeed,
-        dt,
-        this.scale.height,
-        this.paddleHeight,
-      )
-    } else if (this.cursors.down?.isDown) {
-      this.player.y = movePaddle(
-        this.player.y,
-        1,
-        this.paddleSpeed,
-        dt,
-        this.scale.height,
-        this.paddleHeight,
-      )
+    if (!this.spectator) {
+      if (this.cursors.up?.isDown) {
+        this.player.y = movePaddle(
+          this.player.y,
+          -1,
+          this.paddleSpeed,
+          dt,
+          this.scale.height,
+          this.paddleHeight,
+        )
+      } else if (this.cursors.down?.isDown) {
+        this.player.y = movePaddle(
+          this.player.y,
+          1,
+          this.paddleSpeed,
+          dt,
+          this.scale.height,
+          this.paddleHeight,
+        )
+      }
     }
 
     if (hasRemote && this.remotePaddleY !== null) {
-      this.opponent.y = Phaser.Math.Linear(
-        this.opponent.y,
-        this.remotePaddleY,
-        0.2,
-      )
+      if (this.spectator) {
+        this.player.y = Phaser.Math.Linear(
+          this.player.y,
+          this.remotePaddleY,
+          0.2,
+        )
+      } else {
+        this.opponent.y = Phaser.Math.Linear(
+          this.opponent.y,
+          this.remotePaddleY,
+          0.2,
+        )
+      }
     } else {
-      this.opponent.y = aiMove(
-        this.opponent.y,
-        this.ball.y,
-        this.paddleSpeed,
-        dt,
-        this.scale.height,
-        this.paddleHeight,
-      )
+      if (this.spectator) {
+        this.player.y = aiMove(
+          this.player.y,
+          this.ball.y,
+          this.paddleSpeed,
+          dt,
+          this.scale.height,
+          this.paddleHeight,
+        )
+      } else {
+        this.opponent.y = aiMove(
+          this.opponent.y,
+          this.ball.y,
+          this.paddleSpeed,
+          dt,
+          this.scale.height,
+          this.paddleHeight,
+        )
+      }
     }
 
     this.ball.x += this.velocity.x * dt
@@ -193,16 +255,24 @@ export default class MainScene extends Phaser.Scene {
       }
     }
 
-    void this.channel?.send({
-      type: 'broadcast',
-      event: 'state',
-      payload: {
+    if (!this.spectator) {
+      const payload = {
         paddleY: this.player.y,
         ballX: this.ball.x,
         ballY: this.ball.y,
         velX: this.velocity.x,
         velY: this.velocity.y,
-      },
-    })
+      }
+      void this.channel?.send({
+        type: 'broadcast',
+        event: 'state',
+        payload,
+      })
+      void this.spectatorChannel?.send({
+        type: 'broadcast',
+        event: 'state',
+        payload,
+      })
+    }
   }
 }
