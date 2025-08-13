@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { getServerAuthSession } from '@/lib/auth'
 import { triggerLeaderboardRecalculation } from '@/lib/leaderboard'
 import { prisma } from '@/lib/prisma'
+import { ok, error } from '@/lib/api-response'
 
 const bodySchema = z.object({
   matchId: z.string(),
@@ -14,12 +14,12 @@ const bodySchema = z.object({
 export async function POST(req: Request) {
   const session = await getServerAuthSession()
   if (!session?.user) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+    return error('unauthorized', 401)
   }
   const json = await req.json()
   const parsed = bodySchema.safeParse(json)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'invalid' }, { status: 400 })
+    return error('invalid', 400)
   }
   const { matchId, p1Score, p2Score } = parsed.data
 
@@ -27,17 +27,17 @@ export async function POST(req: Request) {
     where: { id: matchId },
   })
   if (!match) {
-    return NextResponse.json({ error: 'not-found' }, { status: 404 })
+    return error('not-found', 404)
   }
   if (session.user.id !== match.p1Id && session.user.id !== match.p2Id) {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+    return error('forbidden', 403)
   }
   if (match.endedAt) {
-    return NextResponse.json({ error: 'already-completed' }, { status: 409 })
+    return error('already-completed', 409)
   }
 
   if (p1Score === p2Score) {
-    return NextResponse.json({ error: 'invalid-score' }, { status: 400 })
+    return error('invalid-score', 400)
   }
 
   const winnerId = p1Score > p2Score ? match.p1Id : match.p2Id
@@ -47,5 +47,5 @@ export async function POST(req: Request) {
     data: { p1Score, p2Score, winnerId, endedAt: new Date() },
   })
   await triggerLeaderboardRecalculation()
-  return NextResponse.json({ ok: true })
+  return ok({ ok: true })
 }
