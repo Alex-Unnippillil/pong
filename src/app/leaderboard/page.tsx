@@ -1,4 +1,5 @@
 import React from 'react'
+import { prisma } from '@/lib/prisma'
 
 interface LeaderboardEntry {
   userId: string
@@ -12,15 +13,11 @@ interface LeaderboardEntry {
 
 export default async function LeaderboardPage() {
   try {
-    const res = await fetch('/api/leaderboard', {
-      cache: 'no-store',
+    const data: LeaderboardEntry[] = await prisma.leaderboard.findMany({
+      take: 10,
+      orderBy: { elo: 'desc' },
+      include: { user: true },
     })
-
-    if (!res.ok) {
-      throw new Error('Failed to fetch leaderboard')
-    }
-
-    const data: LeaderboardEntry[] = await res.json()
 
     return (
       <main className="p-8">
