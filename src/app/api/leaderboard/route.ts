@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { ok, error } from '@/lib/api-response'
 
 export const leaderboardQueryOptions = {
   take: 10,
@@ -9,9 +9,8 @@ export const leaderboardQueryOptions = {
 
 export async function GET() {
   try {
-    const data = await prisma.leaderboard.findMany(leaderboardQueryOptions)
-    return NextResponse.json(data)
+
   } catch {
-    return NextResponse.json({ error: 'server error' }, { status: 500 })
+    return error('server error', 500)
   }
 }
