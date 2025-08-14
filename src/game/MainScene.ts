@@ -18,14 +18,25 @@ export default class MainScene extends Phaser.Scene {
   private score = new ScoreManager()
   private matchId?: string
   private channel?: RealtimeChannel
+  private spectatorChannel?: RealtimeChannel
+  private spectator = false
   private remotePaddleY: number | null = null
   private remoteBall: { x: number; y: number; vx: number; vy: number } | null =
     null
   private lastRemoteUpdate = 0
+  private remoteState: {
+    playerY: number
+    opponentY: number
+    ballX: number
+    ballY: number
+    playerScore: number
+    opponentScore: number
+  } | null = null
 
-  constructor(matchId?: string) {
+  constructor(matchId?: string, spectator = false) {
     super('MainScene')
     this.matchId = matchId
+    this.spectator = spectator
   }
 
   preload() {
@@ -59,6 +70,11 @@ export default class MainScene extends Phaser.Scene {
 
     const unsubscribeScore = this.score.onMatchEnd(async (result) => {
       this.events.emit('matchEnd', result)
+      void this.spectatorChannel?.send({
+        type: 'broadcast',
+        event: 'end',
+        payload: result,
+      })
       if (this.matchId) {
         try {
           const response = await fetch('/api/score', {
@@ -80,24 +96,46 @@ export default class MainScene extends Phaser.Scene {
     })
 
     if (this.matchId && supabase) {
-      this.channel = supabase
-        .channel(`match:${this.matchId}`)
-        .on('broadcast', { event: 'state' }, ({ payload }) => {
-          this.remotePaddleY = payload.paddleY
-          this.remoteBall = {
-            x: payload.ballX,
-            y: payload.ballY,
-            vx: payload.velX,
-            vy: payload.velY,
-          }
-          this.lastRemoteUpdate = Date.now()
-        })
-      void this.channel.subscribe()
+      if (this.spectator) {
+        this.channel = supabase
+          .channel(`match:${this.matchId}:spectate`)
+          .on('broadcast', { event: 'state' }, ({ payload }) => {
+            this.remoteState = payload
+          })
+          .on('broadcast', { event: 'end' }, ({ payload }) => {
+            this.events.emit('matchEnd', payload)
+          })
+          .on('status', (status) => {
+            if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+              this.events.emit('channelClose')
+            }
+          })
+        void this.channel.subscribe()
+      } else {
+        this.channel = supabase
+          .channel(`match:${this.matchId}`)
+          .on('broadcast', { event: 'state' }, ({ payload }) => {
+            this.remotePaddleY = payload.paddleY
+            this.remoteBall = {
+              x: payload.ballX,
+              y: payload.ballY,
+              vx: payload.velX,
+              vy: payload.velY,
+            }
+            this.lastRemoteUpdate = Date.now()
+          })
+        void this.channel.subscribe()
+        this.spectatorChannel = supabase.channel(
+          `match:${this.matchId}:spectate`,
+        )
+        void this.spectatorChannel.subscribe()
+      }
     }
 
     this.events.once(Phaser.Scenes.Events.DESTROY, () => {
       unsubscribeScore()
       this.channel?.unsubscribe()
+      this.spectatorChannel?.unsubscribe()
     })
   }
 
@@ -117,6 +155,18 @@ export default class MainScene extends Phaser.Scene {
     const dt = delta / 1000
     const now = Date.now()
     const hasRemote = now - this.lastRemoteUpdate < 1000
+
+    if (this.spectator) {
+      if (this.remoteState) {
+        this.player.y = this.remoteState.playerY
+        this.opponent.y = this.remoteState.opponentY
+        this.ball.x = this.remoteState.ballX
+        this.ball.y = this.remoteState.ballY
+        this.playerScoreText.setText(String(this.remoteState.playerScore))
+        this.opponentScoreText.setText(String(this.remoteState.opponentScore))
+      }
+      return
+    }
 
     if (this.cursors.up?.isDown) {
       this.player.y = movePaddle(
@@ -202,6 +252,19 @@ export default class MainScene extends Phaser.Scene {
         ballY: this.ball.y,
         velX: this.velocity.x,
         velY: this.velocity.y,
+      },
+    })
+
+    void this.spectatorChannel?.send({
+      type: 'broadcast',
+      event: 'state',
+      payload: {
+        playerY: this.player.y,
+        opponentY: this.opponent.y,
+        ballX: this.ball.x,
+        ballY: this.ball.y,
+        playerScore: this.score.playerScore,
+        opponentScore: this.score.opponentScore,
       },
     })
   }

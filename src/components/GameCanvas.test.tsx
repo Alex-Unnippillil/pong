@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-var */
 import React from 'react'
 ;(globalThis as unknown as { React: typeof React }).React = React
 import { act, render, waitFor } from '@testing-library/react'
