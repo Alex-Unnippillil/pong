@@ -20,8 +20,8 @@ jobs:
           cache: pnpm
       - run: pnpm install
       - run: npx prisma generate
-      - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm test
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm e2e --browser=chromium
+      - run: env $(cat .env.ci | xargs) pnpm lint
+      - run: env $(cat .env.ci | xargs) pnpm typecheck
+      - run: env $(cat .env.ci | xargs) pnpm test
+      - run: env $(cat .env.ci | xargs) pnpm exec playwright install --with-deps chromium
+      - run: env $(cat .env.ci | xargs) pnpm e2e --browser=chromium
