@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-var */
 import React from 'react'
 ;(globalThis as unknown as { React: typeof React }).React = React
 import { act, render, waitFor } from '@testing-library/react'
@@ -26,7 +27,25 @@ vi.mock('phaser', () => {
     this.destroy = vi.fn()
   })
   class Scene {}
-  const PhaserMock = { AUTO: 0, Game, Scene }
+  class Vector2 {
+    x: number
+    y: number
+    constructor(x: number, y: number) {
+      this.x = x
+      this.y = y
+    }
+    set(x: number, y: number) {
+      this.x = x
+      this.y = y
+    }
+  }
+  const PhaserMock = {
+    AUTO: 0,
+    Game,
+    Scene,
+    Math: { Vector2 },
+    Scenes: { Events: { DESTROY: 'destroy' } },
+  }
   return { __esModule: true, default: PhaserMock, ...PhaserMock }
 })
 

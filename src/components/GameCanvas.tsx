@@ -2,13 +2,23 @@
 
 import { useEffect, useRef } from 'react'
 
-import { usePhaserGame } from '../hooks/usePhaserGame'
+import { usePhaserGame, UsePhaserGameOptions } from '../hooks/usePhaserGame'
 import { useSettings } from '../store/settings'
 
-export function GameCanvas() {
+type GameCanvasProps = UsePhaserGameOptions
+
+export function GameCanvas({
+  matchId,
+  spectate,
+  readOnly,
+}: GameCanvasProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const muted = useSettings((s) => s.muted)
-  const gameRef = usePhaserGame(containerRef, muted)
+  const gameRef = usePhaserGame(containerRef, muted, {
+    matchId,
+    spectate,
+    readOnly,
+  })
 
   useEffect(() => {
     const handleResize = () => {
@@ -23,7 +33,7 @@ export function GameCanvas() {
     return () => {
       window.removeEventListener('resize', handleResize)
     }
-  }, [])
+  }, [gameRef])
 
   return <div ref={containerRef} className="w-full h-full" />
 }

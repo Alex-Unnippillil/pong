@@ -18,14 +18,25 @@ export default class MainScene extends Phaser.Scene {
   private score = new ScoreManager()
   private matchId?: string
   private channel?: RealtimeChannel
+  private spectateChannel?: RealtimeChannel
+  private spectateMode = false
+  private readOnly = false
   private remotePaddleY: number | null = null
+  private remoteOpponentPaddleY: number | null = null
+  private remotePlayerScore: number | null = null
+  private remoteOpponentScore: number | null = null
   private remoteBall: { x: number; y: number; vx: number; vy: number } | null =
     null
   private lastRemoteUpdate = 0
 
-  constructor(matchId?: string) {
+  constructor(
+    matchId?: string,
+    opts: { spectate?: boolean; readOnly?: boolean } = {},
+  ) {
     super('MainScene')
     this.matchId = matchId
+    this.spectateMode = opts.spectate ?? false
+    this.readOnly = opts.readOnly ?? false
   }
 
   preload() {
@@ -76,14 +87,30 @@ export default class MainScene extends Phaser.Scene {
         } catch (error) {
           console.error('Failed to submit score', error)
         }
+
+        void this.spectateChannel?.send({
+          type: 'broadcast',
+          event: 'matchEnd',
+          payload: result,
+        })
       }
     })
 
     if (this.matchId && supabase) {
+      const name = this.spectateMode
+        ? `match:${this.matchId}:spectate`
+        : `match:${this.matchId}`
       this.channel = supabase
-        .channel(`match:${this.matchId}`)
+        .channel(name)
         .on('broadcast', { event: 'state' }, ({ payload }) => {
-          this.remotePaddleY = payload.paddleY
+          if (this.spectateMode) {
+            this.remotePaddleY = payload.playerY
+            this.remoteOpponentPaddleY = payload.opponentY
+            this.remotePlayerScore = payload.playerScore
+            this.remoteOpponentScore = payload.opponentScore
+          } else {
+            this.remotePaddleY = payload.paddleY
+          }
           this.remoteBall = {
             x: payload.ballX,
             y: payload.ballY,
@@ -92,12 +119,36 @@ export default class MainScene extends Phaser.Scene {
           }
           this.lastRemoteUpdate = Date.now()
         })
-      void this.channel.subscribe()
+
+      if (this.spectateMode) {
+        this.channel.on('broadcast', { event: 'matchEnd' }, ({ payload }) => {
+          this.events.emit('matchEnd', payload)
+        })
+      }
+
+      void this.channel.subscribe((status) => {
+        if (
+          this.spectateMode &&
+          (status === 'CLOSED' ||
+            status === 'CHANNEL_ERROR' ||
+            status === 'TIMED_OUT')
+        ) {
+          this.events.emit('disconnect')
+        }
+      })
+
+      if (!this.spectateMode) {
+        this.spectateChannel = supabase.channel(
+          `match:${this.matchId}:spectate`,
+        )
+        void this.spectateChannel.subscribe()
+      }
     }
 
     this.events.once(Phaser.Scenes.Events.DESTROY, () => {
       unsubscribeScore()
       this.channel?.unsubscribe()
+      this.spectateChannel?.unsubscribe()
     })
   }
 
@@ -117,6 +168,36 @@ export default class MainScene extends Phaser.Scene {
     const dt = delta / 1000
     const now = Date.now()
     const hasRemote = now - this.lastRemoteUpdate < 1000
+
+    if (this.readOnly) {
+      if (
+        hasRemote &&
+        this.remoteBall &&
+        this.remotePaddleY !== null &&
+        this.remoteOpponentPaddleY !== null
+      ) {
+        this.player.y = Phaser.Math.Linear(
+          this.player.y,
+          this.remotePaddleY,
+          0.2,
+        )
+        this.opponent.y = Phaser.Math.Linear(
+          this.opponent.y,
+          this.remoteOpponentPaddleY,
+          0.2,
+        )
+        this.ball.x = Phaser.Math.Linear(this.ball.x, this.remoteBall.x, 0.2)
+        this.ball.y = Phaser.Math.Linear(this.ball.y, this.remoteBall.y, 0.2)
+        this.velocity.set(this.remoteBall.vx, this.remoteBall.vy)
+        if (this.remotePlayerScore !== null) {
+          this.playerScoreText.setText(String(this.remotePlayerScore))
+        }
+        if (this.remoteOpponentScore !== null) {
+          this.opponentScoreText.setText(String(this.remoteOpponentScore))
+        }
+      }
+      return
+    }
 
     if (this.cursors.up?.isDown) {
       this.player.y = movePaddle(
@@ -202,6 +283,21 @@ export default class MainScene extends Phaser.Scene {
         ballY: this.ball.y,
         velX: this.velocity.x,
         velY: this.velocity.y,
+      },
+    })
+
+    void this.spectateChannel?.send({
+      type: 'broadcast',
+      event: 'state',
+      payload: {
+        playerY: this.player.y,
+        opponentY: this.opponent.y,
+        ballX: this.ball.x,
+        ballY: this.ball.y,
+        velX: this.velocity.x,
+        velY: this.velocity.y,
+        playerScore: this.score.playerScore,
+        opponentScore: this.score.opponentScore,
       },
     })
   }
