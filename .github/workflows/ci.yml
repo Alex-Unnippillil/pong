@@ -24,6 +24,9 @@ jobs:
         run: cat .env.ci >> $GITHUB_ENV
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test
+      - run: pnpm test --coverage
+      - uses: codecov/codecov-action@v4
+        with:
+          files: coverage/lcov.info
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e --browser=chromium
