@@ -34,12 +34,7 @@ Optional variables:
 
 Use these names when setting deployment secrets.
 
-### CI environment
 
-`.env.ci` provides safe placeholder values for all required environment variables. Load it to mirror the CI setup when running checks locally:
-
-```bash
-source .env.ci
 pnpm lint
 pnpm typecheck
 pnpm test

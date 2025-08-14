@@ -20,7 +20,7 @@ jobs:
           cache: pnpm
       - run: pnpm install
       - run: npx prisma generate
-      - name: Load CI env
+
         run: cat .env.ci >> $GITHUB_ENV
       - run: pnpm lint
       - run: pnpm typecheck

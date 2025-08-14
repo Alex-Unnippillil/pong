@@ -3,17 +3,20 @@ import React from 'react'
 import { renderHook, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
 
-var Game: any
-
+const Game = vi.fn(function (this: any) {
+  this.sound = { mute: false }
+  this.destroy = vi.fn()
+})
 vi.mock('phaser', () => {
-  Game = vi.fn(function (this: any) {
-    this.sound = { mute: false }
-    this.destroy = vi.fn()
-  })
   class Scene {}
   const PhaserMock = { AUTO: 0, Game, Scene }
   return { __esModule: true, default: PhaserMock, ...PhaserMock }
 })
+
+vi.mock('../game/MainScene', () => ({
+  __esModule: true,
+  default: class MainScene {},
+}))
 
 import { usePhaserGame } from './usePhaserGame'
 
@@ -26,9 +29,12 @@ describe('usePhaserGame', () => {
     const container = document.createElement('div')
     const ref = { current: container } as React.RefObject<HTMLDivElement>
 
-    const { rerender } = renderHook(({ muted }) => usePhaserGame(ref, muted), {
-      initialProps: { muted: false },
-    })
+    const { rerender } = renderHook(
+      ({ muted }) => usePhaserGame(ref, muted, 'match'),
+      {
+        initialProps: { muted: false },
+      },
+    )
 
     await waitFor(() => {
       expect(Game).toHaveBeenCalledTimes(1)
@@ -47,7 +53,7 @@ describe('usePhaserGame', () => {
     const container = document.createElement('div')
     const ref = { current: container } as React.RefObject<HTMLDivElement>
 
-    const { unmount } = renderHook(() => usePhaserGame(ref, false))
+    const { unmount } = renderHook(() => usePhaserGame(ref, false, 'match'))
 
     await waitFor(() => {
       expect(Game).toHaveBeenCalledTimes(1)

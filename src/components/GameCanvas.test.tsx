@@ -3,32 +3,35 @@ import React from 'react'
 import { act, render, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
 
-var Game: any
-
+const Game = vi.fn(function (
+  this: any,
+  config: { parent?: HTMLElement; width: number; height: number },
+) {
+  this.canvas = document.createElement('canvas')
+  this.canvas.width = config.width
+  this.canvas.height = config.height
+  if (config.parent) {
+    config.parent.appendChild(this.canvas)
+  }
+  this.scale = {
+    resize: (width: number, height: number) => {
+      this.canvas.width = width
+      this.canvas.height = height
+    },
+  }
+  this.sound = { mute: false }
+  this.destroy = vi.fn()
+})
 vi.mock('phaser', () => {
-  Game = vi.fn(function (
-    this: any,
-    config: { parent?: HTMLElement; width: number; height: number },
-  ) {
-    this.canvas = document.createElement('canvas')
-    this.canvas.width = config.width
-    this.canvas.height = config.height
-    if (config.parent) {
-      config.parent.appendChild(this.canvas)
-    }
-    this.scale = {
-      resize: (width: number, height: number) => {
-        this.canvas.width = width
-        this.canvas.height = height
-      },
-    }
-    this.sound = { mute: false }
-    this.destroy = vi.fn()
-  })
   class Scene {}
   const PhaserMock = { AUTO: 0, Game, Scene }
   return { __esModule: true, default: PhaserMock, ...PhaserMock }
 })
+
+vi.mock('../game/MainScene', () => ({
+  __esModule: true,
+  default: class MainScene {},
+}))
 
 import { GameCanvas } from './GameCanvas'
 import { useSettings } from '../store/settings'
