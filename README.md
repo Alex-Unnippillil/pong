@@ -34,17 +34,7 @@ Optional variables:
 
 Use these names when setting deployment secrets.
 
-### Reproducing CI locally
 
-The repository includes a `.env.ci` file with safe placeholder values for all
-required environment variables. GitHub Actions and Playwright load this file
-automatically. To mimic the CI environment locally, source the file before
-running lint, type checks, tests, or Playwright:
-
-```bash
-set -a
-source .env.ci
-set +a
 pnpm lint
 pnpm typecheck
 pnpm test
