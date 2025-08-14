@@ -34,6 +34,19 @@ Optional variables:
 
 Use these names when setting deployment secrets.
 
+### CI environment file
+
+The repository includes a `.env.ci` file with placeholder values for the required
+environment variables. CI workflows load this file when running lint, typecheck,
+unit tests, and Playwright checks. To replicate the CI setup locally, prefix
+commands with the variables from this file:
+
+```bash
+env $(cat .env.ci | xargs) pnpm lint
+```
+
+Use the same pattern for `pnpm typecheck`, `pnpm test`, and other CI tasks.
+
 ## Architecture Overview
 
 ```mermaid
