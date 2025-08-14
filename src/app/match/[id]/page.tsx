@@ -1,14 +1,13 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useSettings } from '@/store/settings'
+import { usePhaserGame } from '@/hooks/usePhaserGame'
 
-import { usePhaserGame } from '../hooks/usePhaserGame'
-import { useSettings } from '../store/settings'
-
-export function GameCanvas({ matchId }: { matchId?: string }) {
+export default function MatchPage({ params }: { params: { id: string } }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const muted = useSettings((s) => s.muted)
-  const gameRef = usePhaserGame(containerRef, muted, matchId)
+  const gameRef = usePhaserGame(containerRef, muted, params.id)
 
   useEffect(() => {
     const handleResize = () => {
@@ -18,12 +17,15 @@ export function GameCanvas({ matchId }: { matchId?: string }) {
         containerRef.current.clientHeight,
       )
     }
-
     window.addEventListener('resize', handleResize)
     return () => {
       window.removeEventListener('resize', handleResize)
     }
-  }, [])
+  }, [gameRef])
 
-  return <div ref={containerRef} className="w-full h-full" />
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-8">
+      <div ref={containerRef} className="w-full h-full" />
+    </main>
+  )
 }

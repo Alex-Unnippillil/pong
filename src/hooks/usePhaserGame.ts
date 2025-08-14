@@ -8,6 +8,7 @@ export type PhaserModule = typeof import('phaser')
 export function usePhaserGame(
   containerRef: React.RefObject<HTMLDivElement>,
   muted: boolean,
+  matchId?: string,
 ) {
   const gameRef = useRef<PhaserModule.Game | null>(null)
 
@@ -22,7 +23,7 @@ export function usePhaserGame(
           parent: containerRef.current!,
           width: containerRef.current!.clientWidth,
           height: containerRef.current!.clientHeight,
-          scene: MainScene,
+          scene: new MainScene(matchId),
         }
         gameRef.current = new Phaser.Game(config)
       }
@@ -30,7 +31,7 @@ export function usePhaserGame(
     }
 
     void init()
-  }, [muted, containerRef])
+  }, [muted, containerRef, matchId])
 
   useEffect(() => {
     return () => {
