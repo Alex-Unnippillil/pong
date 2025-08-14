@@ -19,6 +19,8 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install
+      - name: Load CI env vars
+        run: cat .env.ci >> $GITHUB_ENV
       - run: npx prisma generate
       - run: pnpm lint
       - run: pnpm typecheck

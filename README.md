@@ -34,6 +34,13 @@ Optional variables:
 
 Use these names when setting deployment secrets.
 
+### Continuous Integration environment
+
+The GitHub Actions workflow loads a `.env.ci` file with safe placeholder
+values before running linting, type checks, unit tests, and end-to-end tests.
+If you add or change environment variables in `src/lib/env.ts`, update
+`.env.ci` so CI runs continue to succeed.
+
 ## Architecture Overview
 
 ```mermaid
