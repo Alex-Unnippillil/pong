@@ -11,23 +11,24 @@ export default async function HistoryPage() {
   }
 
   const userId = session.user.id
+  const matches = await prisma.match.findMany({
+    where: {
+      OR: [{ p1Id: userId }, { p2Id: userId }],
+    },
+    orderBy: { startedAt: 'desc' },
+    include: {
+      p1: { select: { name: true } },
+      p2: { select: { name: true } },
+      winner: { select: { id: true, name: true } },
+    },
+  })
 
-  try {
-    const matches = await prisma.match.findMany({
-      where: {
-        OR: [{ p1Id: userId }, { p2Id: userId }],
-      },
-      orderBy: { startedAt: 'desc' },
-      include: {
-        p1: { select: { name: true } },
-        p2: { select: { name: true } },
-        winner: { select: { id: true, name: true } },
-      },
-    })
-
-    return (
-      <main className="p-8">
-        <h1 className="mb-4 text-3xl font-bold">Match History</h1>
+  return (
+    <main className="p-8">
+      <h1 className="mb-4 text-3xl font-bold">Match History</h1>
+      {matches.length === 0 ? (
+        <p>No matches played yet.</p>
+      ) : (
         <table className="min-w-full border">
           <thead>
             <tr>
@@ -39,12 +40,12 @@ export default async function HistoryPage() {
           </thead>
           <tbody>
             {matches.map((match) => {
-              const isP1 = match.p1Id === userId
-              const opponentName = isP1
+              const userIsP1 = match.p1Id === userId
+              const opponentName = userIsP1
                 ? (match.p2?.name ?? 'Unknown')
                 : (match.p1.name ?? 'Unknown')
-              const userScore = isP1 ? match.p1Score : match.p2Score
-              const opponentScore = isP1 ? match.p2Score : match.p1Score
+              const userScore = userIsP1 ? match.p1Score : match.p2Score
+              const opponentScore = userIsP1 ? match.p2Score : match.p1Score
               const winner = match.winnerId
                 ? match.winnerId === userId
                   ? 'You'
@@ -65,15 +66,7 @@ export default async function HistoryPage() {
             })}
           </tbody>
         </table>
-      </main>
-    )
-  } catch (error) {
-    console.error('Failed to load match history:', error)
-    return (
-      <main className="p-8">
-        <h1 className="mb-4 text-3xl font-bold">Match History</h1>
-        <p>Unable to load match history.</p>
-      </main>
-    )
-  }
+      )}
+    </main>
+  )
 }
