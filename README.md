@@ -34,6 +34,12 @@ Optional variables:
 
 Use these names when setting deployment secrets.
 
+### CI environment
+
+The GitHub Actions workflow loads environment variables from `.env.ci` before
+running linting, type checking, unit, and end-to-end tests. The file contains
+safe placeholder values so contributors can run CI checks without real secrets.
+
 ## Architecture Overview
 
 ```mermaid
