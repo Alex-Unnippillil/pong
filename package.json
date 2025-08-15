@@ -2,7 +2,7 @@
   "name": "photonpong",
   "version": "0.1.0",
   "private": true,
-  "license": "MIT",
+
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -31,6 +31,8 @@
     "zustand": "^5.0.7"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@eslint/eslintrc": "^3",
     "@playwright/test": "^1.54.2",
     "@tailwindcss/postcss": "^4",
@@ -54,7 +56,8 @@
     "vitest": "^3.2.4"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm lint-staged"
+    "pre-commit": "pnpm lint-staged",
+    "commit-msg": "commitlint --edit $1"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,css,md}": "prettier --write"

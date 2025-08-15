@@ -4,13 +4,19 @@ Modern Pong built with Next.js, Phaser 3, and a serverless stack.
 
 ## Setup
 
+
+
 ```bash
+docker-compose up -d
 pnpm install
 pnpm prisma migrate dev
 pnpm dev
 ```
 
 Copy `.env.example` to `.env.local` and fill in secrets.
+
+This project includes an [EditorConfig](https://editorconfig.org/) file to enforce
+2-space indentation, UTF-8 encoding, and final newlines.
 
 ### Environment variables
 
@@ -34,12 +40,12 @@ Optional variables:
 
 Use these names when setting deployment secrets.
 
-
 pnpm lint
 pnpm typecheck
 pnpm test
 pnpm e2e --browser=chromium
-```
+
+````
 
 ## Architecture Overview
 
@@ -52,7 +58,7 @@ graph LR
   A -->|HTTP| C[Next.js API Routes]
   C --> D[(Postgres)]
   C --> E[(Upstash Redis)]
-```
+````
 
 ## Background jobs
 
