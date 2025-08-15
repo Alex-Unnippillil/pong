@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -10,6 +10,10 @@ vi.mock('@/lib/prisma', () => ({
 
 import { GET, leaderboardQueryOptions } from './route'
 import { prisma } from '@/lib/prisma'
+
+afterEach(() => {
+  vi.clearAllMocks()
+})
 
 describe('leaderboard API', () => {
   it('returns leaderboard entries', async () => {
