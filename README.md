@@ -4,7 +4,7 @@ Modern Pong built with Next.js, Phaser 3, and a serverless stack.
 
 ## Setup
 
-Start Postgres and Redis locally:
+
 
 ```bash
 docker-compose up -d
