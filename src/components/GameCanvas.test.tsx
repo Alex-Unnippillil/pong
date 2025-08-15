@@ -3,8 +3,15 @@ import React from 'react'
 import { act, render, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
 
+interface MockGame {
+  canvas: HTMLCanvasElement
+  scale: { resize: (width: number, height: number) => void }
+  sound: { mute: boolean }
+  destroy: ReturnType<typeof vi.fn>
+}
+
 const Game = vi.fn(function (
-  this: any,
+  this: MockGame,
   config: { parent?: HTMLElement; width: number; height: number },
 ) {
   this.canvas = document.createElement('canvas')
@@ -92,7 +99,7 @@ describe('GameCanvas', () => {
 
     await waitFor(() => {
       expect(Game).toHaveBeenCalledTimes(1)
-      expect((Game.mock.instances[0] as any).sound.mute).toBe(true)
+      expect((Game.mock.instances[0] as MockGame).sound.mute).toBe(true)
     })
 
     act(() => {
@@ -100,7 +107,7 @@ describe('GameCanvas', () => {
     })
 
     await waitFor(() => {
-      expect((Game.mock.instances[0] as any).sound.mute).toBe(false)
+      expect((Game.mock.instances[0] as MockGame).sound.mute).toBe(false)
     })
   })
 })

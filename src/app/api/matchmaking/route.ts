@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { getServerAuthSession } from '@/lib/auth'
 import { redis } from '@/lib/redis'
 import { prisma } from '@/lib/prisma'
-import { env } from '@/lib/env'
+import { env } from '@/lib/env.server'
 import { ok, error } from '@/lib/api-response'
 
 const bodySchema = z.object({
