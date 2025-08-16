@@ -13,7 +13,7 @@ const bodySchema = z.object({
 export async function POST(req: Request) {
   const session = await getServerAuthSession()
   if (!session?.user) {
-    return NextResponse.redirect(new URL('/api/auth/signin', req.url))
+    return NextResponse.redirect(new URL('/api/auth/signin', req.url), 302)
   }
 
   const formData = await req.formData()
@@ -32,5 +32,5 @@ export async function POST(req: Request) {
     update: parsed.data,
   })
 
-  return NextResponse.redirect(new URL('/profile', req.url))
+  return NextResponse.redirect(new URL('/profile', req.url), 302)
 }

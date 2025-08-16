@@ -12,7 +12,8 @@
     "e2e": "playwright test",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "worker:leaderboard": "tsx src/workers/leaderboard.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -30,6 +31,8 @@
     "zustand": "^5.0.7"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@eslint/eslintrc": "^3",
     "@playwright/test": "^1.54.2",
     "@tailwindcss/postcss": "^4",
@@ -53,7 +56,8 @@
     "vitest": "^3.2.4"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm lint-staged"
+    "pre-commit": "pnpm lint-staged",
+    "commit-msg": "commitlint --edit $1"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,css,md}": "prettier --write"

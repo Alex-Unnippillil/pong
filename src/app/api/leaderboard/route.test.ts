@@ -13,18 +13,18 @@ import { prisma } from '@/lib/prisma'
 
 describe('leaderboard API', () => {
   it('returns leaderboard entries', async () => {
-    const sample = [
+    const result = [
       { id: '1', elo: 1000, user: { id: 'u1', name: 'Alice' } },
       { id: '2', elo: 900, user: { id: 'u2', name: 'Bob' } },
     ]
 
-    prisma.leaderboard.findMany.mockResolvedValue(sample)
+    prisma.leaderboard.findMany.mockResolvedValue(result)
 
     const res = await GET()
     const json = await res.json()
 
     expect(res.status).toBe(200)
-    expect(json).toEqual(sample)
+    expect(json).toEqual(result)
     expect(prisma.leaderboard.findMany).toHaveBeenCalledWith(
       leaderboardQueryOptions,
     )
