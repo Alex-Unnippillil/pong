@@ -1,5 +1,7 @@
 # PhotonPong
 
+[![codecov](https://codecov.io/gh/mirrors/pong/branch/main/graph/badge.svg)](https://codecov.io/gh/mirrors/pong)
+
 Modern Pong built with Next.js, Phaser 3, and a serverless stack.
 
 ## Setup
@@ -39,7 +41,6 @@ Optional variables:
 - `MATCHMAKING_QUEUE_TTL_SECONDS` – TTL in seconds for the matchmaking queue (default 60)
 
 Use these names when setting deployment secrets.
-
 
 pnpm lint
 pnpm typecheck
