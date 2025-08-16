@@ -67,11 +67,17 @@ export async function GET(req: Request) {
     where.createdAt = { gte: date }
   }
 
-  const data = await prisma.telemetry.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    take: 100,
-  })
-
-  return ok(data)
+  try {
+    const data = await prisma.telemetry.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    })
+    return ok(data)
+  } catch (err) {
+    console.warn('telemetry query failed', {
+      error: err instanceof Error ? err.message : String(err),
+    })
+    return error('server error', 500)
+  }
 }

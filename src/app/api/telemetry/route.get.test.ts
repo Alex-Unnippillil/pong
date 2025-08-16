@@ -59,4 +59,16 @@ describe('telemetry GET API', () => {
     expect(await res.json()).toEqual({ error: 'invalid since' })
     expect(prisma.telemetry.findMany).not.toHaveBeenCalled()
   })
+
+  it('returns 500 when prisma.findMany throws', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    prisma.telemetry.findMany.mockRejectedValueOnce(new Error('fail'))
+
+    const res = await GET(new Request('http://localhost/api/telemetry'))
+
+    expect(res.status).toBe(500)
+    expect(await res.json()).toEqual({ error: 'server error' })
+    expect(warn).toHaveBeenCalled()
+    warn.mockRestore()
+  })
 })
