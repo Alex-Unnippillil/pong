@@ -56,6 +56,16 @@ describe('telemetry API', () => {
     ])
   })
 
+  it('returns 400 on invalid since', async () => {
+    const res = await GET(
+      new Request('http://localhost/api/telemetry?since=not-a-date'),
+    )
+
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'invalid since' })
+    expect(prisma.telemetry.findMany).not.toHaveBeenCalled()
+  })
+
   it('hashes ip before using rate limit key', async () => {
     const ip = '1.2.3.4'
     await POST(
