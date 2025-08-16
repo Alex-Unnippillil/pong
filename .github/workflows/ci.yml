@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,8 +24,8 @@ jobs:
           cache: pnpm
       - run: pnpm install
       - run: npx prisma generate
-
-        run: cat .env.ci >> $GITHUB_ENV
+      - run: cat .env.ci >> $GITHUB_ENV
+      - run: pnpm prisma:seed
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test --coverage

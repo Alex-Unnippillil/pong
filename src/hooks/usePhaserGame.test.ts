@@ -3,7 +3,12 @@ import React from 'react'
 import { renderHook, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
 
-const Game = vi.fn(function (this: any) {
+interface MockGame {
+  sound: { mute: boolean }
+  destroy: ReturnType<typeof vi.fn>
+}
+
+const Game = vi.fn(function (this: MockGame) {
   this.sound = { mute: false }
   this.destroy = vi.fn()
 })
@@ -40,12 +45,12 @@ describe('usePhaserGame', () => {
       expect(Game).toHaveBeenCalledTimes(1)
     })
 
-    expect((Game.mock.instances[0] as any).sound.mute).toBe(false)
+    expect((Game.mock.instances[0] as MockGame).sound.mute).toBe(false)
 
     rerender({ muted: true })
 
     await waitFor(() => {
-      expect((Game.mock.instances[0] as any).sound.mute).toBe(true)
+      expect((Game.mock.instances[0] as MockGame).sound.mute).toBe(true)
     })
   })
 

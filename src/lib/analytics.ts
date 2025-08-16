@@ -1,6 +1,6 @@
 import posthog from 'posthog-js'
 
-import { env } from '@/lib/env'
+import { env } from '@/lib/env.client'
 
 export function initAnalytics() {
   if (typeof window === 'undefined') return

@@ -7,12 +7,16 @@ Modern Pong built with Next.js, Phaser 3, and a serverless stack.
 ## Setup
 
 ```bash
+
 pnpm install
 pnpm prisma migrate dev
 pnpm dev
 ```
 
 Copy `.env.example` to `.env.local` and fill in secrets.
+
+This project includes an [EditorConfig](https://editorconfig.org/) file to enforce
+2-space indentation, UTF-8 encoding, and final newlines.
 
 ### Environment variables
 
@@ -25,6 +29,8 @@ Set the following environment variables for the application:
 - `GITHUB_ID` – GitHub OAuth client ID
 - `GITHUB_SECRET` – GitHub OAuth client secret
 - `AUTH_SECRET` – NextAuth secret
+- `NEXT_PUBLIC_SUPABASE_URL` – Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` – Supabase anonymous API key
 - `UPSTASH_REDIS_URL` – Upstash Redis REST URL
 - `UPSTASH_REDIS_TOKEN` – Upstash Redis REST token
 
@@ -59,8 +65,11 @@ graph LR
 ## Background jobs
 
 When a match score is reported, a message is published to the `leaderboard:recalc`
-Redis channel. A separate worker can subscribe to this channel and rebuild the
-leaderboard asynchronously.
+Redis channel. Start the worker to rebuild the leaderboard asynchronously:
+
+```bash
+pnpm worker:leaderboard
+```
 
 ## Offline Testing
 
