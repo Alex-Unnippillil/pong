@@ -63,8 +63,11 @@ graph LR
 ## Background jobs
 
 When a match score is reported, a message is published to the `leaderboard:recalc`
-Redis channel. A separate worker can subscribe to this channel and rebuild the
-leaderboard asynchronously.
+Redis channel. Start the worker to rebuild the leaderboard asynchronously:
+
+```bash
+pnpm worker:leaderboard
+```
 
 ## Offline Testing
 
