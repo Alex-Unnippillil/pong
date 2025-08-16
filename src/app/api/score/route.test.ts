@@ -10,14 +10,7 @@ vi.mock('../../../lib/prisma', () => ({
 }))
 
 vi.mock('../../../lib/auth', () => ({
-  getServerAuthSession: vi.fn(),
-}))
 
-vi.mock('../../../lib/leaderboard', () => ({
-  triggerLeaderboardRecalculation: vi.fn(),
-}))
-
-import { POST } from './route'
 import { prisma } from '../../../lib/prisma'
 import { getServerAuthSession } from '../../../lib/auth'
 import { triggerLeaderboardRecalculation } from '../../../lib/leaderboard'
@@ -134,5 +127,20 @@ describe('score API', () => {
     expect(await res.json()).toEqual({ error: 'invalid-score' })
     expect(prisma.match.update).not.toHaveBeenCalled()
     expect(triggerLeaderboardRecalculation).not.toHaveBeenCalled()
+  })
+
+  it('returns 500 on update failure', async () => {
+    const body = {
+      matchId: 'm1',
+      p1Score: 10,
+      p2Score: 5,
+      winnerId: 'p1',
+    }
+    vi.mocked(prisma.match.update).mockRejectedValueOnce(new Error('fail'))
+    const res = await POST(jsonRequest(body))
+    const json = await res.json()
+
+    expect(res.status).toBe(500)
+    expect(json).toEqual({ error: 'server error' })
   })
 })
