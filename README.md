@@ -4,8 +4,6 @@ Modern Pong built with Next.js, Phaser 3, and a serverless stack.
 
 ## Setup
 
-
-
 ```bash
 docker-compose up -d
 pnpm install
@@ -29,6 +27,8 @@ Set the following environment variables for the application:
 - `GITHUB_ID` – GitHub OAuth client ID
 - `GITHUB_SECRET` – GitHub OAuth client secret
 - `AUTH_SECRET` – NextAuth secret
+- `NEXT_PUBLIC_SUPABASE_URL` – Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` – Supabase anonymous API key
 - `UPSTASH_REDIS_URL` – Upstash Redis REST URL
 - `UPSTASH_REDIS_TOKEN` – Upstash Redis REST token
 
@@ -40,12 +40,12 @@ Optional variables:
 
 Use these names when setting deployment secrets.
 
+```bash
 pnpm lint
 pnpm typecheck
 pnpm test
 pnpm e2e --browser=chromium
-
-````
+```
 
 ## Architecture Overview
 
@@ -58,7 +58,7 @@ graph LR
   A -->|HTTP| C[Next.js API Routes]
   C --> D[(Postgres)]
   C --> E[(Upstash Redis)]
-````
+```
 
 ## Background jobs
 
