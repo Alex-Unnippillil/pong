@@ -4,20 +4,21 @@ import GithubProvider from 'next-auth/providers/github'
 import EmailProvider from 'next-auth/providers/email'
 
 import { prisma } from '@/lib/prisma'
+import { env } from '@/lib/env.server'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     EmailProvider({
-      server: process.env.EMAIL_SERVER!,
-      from: process.env.EMAIL_FROM!,
+      server: env.EMAIL_SERVER,
+      from: env.EMAIL_FROM,
     }),
     GithubProvider({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET!,
+      clientId: env.GITHUB_ID,
+      clientSecret: env.GITHUB_SECRET,
     }),
   ],
-  secret: process.env.AUTH_SECRET,
+  secret: env.AUTH_SECRET,
 }
 
 export const getServerAuthSession = () => getServerSession(authOptions)

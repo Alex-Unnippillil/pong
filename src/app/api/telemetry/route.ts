@@ -1,12 +1,15 @@
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { redis } from '@/lib/redis'
+import { createHash } from 'node:crypto'
+import { z } from 'zod'
+import { ok, error } from '@/lib/api-response'
 
-const schema = z.object({
+export const telemetrySchema = z.object({
   eventType: z.string(),
   payload: z
-    .record(z.any())
+    .custom<Record<string, unknown>>(
+      (val) => typeof val === 'object' && val !== null && !Array.isArray(val),
+    )
     .refine((val) => Object.keys(val).length <= 50, {
       message: 'payload too large',
     })
@@ -16,31 +19,37 @@ const schema = z.object({
   userId: z.string().optional(),
 })
 
+const RATE_LIMIT_WINDOW_SECONDS = 60
+const RATE_LIMIT_MAX_REQUESTS = 60
+
 export async function POST(req: Request) {
   const ip =
     req.headers.get('x-forwarded-for') ??
     req.headers.get('x-real-ip') ??
     'unknown'
-  const key = `telemetry:ip:${ip}`
+  const hashedIp = createHash('sha256').update(ip).digest('hex')
+  const key = `telemetry:ip:${hashedIp}`
   const count = await redis.incr(key)
   if (count === 1) {
-    await redis.expire(key, 60)
+    await redis.expire(key, RATE_LIMIT_WINDOW_SECONDS)
   }
-  if (count > 60) {
-    return NextResponse.json({ error: 'rate limited' }, { status: 429 })
+  if (count > RATE_LIMIT_MAX_REQUESTS) {
+    return error('rate limited', 429)
   }
   const json = await req.json()
-  const parsed = schema.safeParse(json)
+  const parsed = telemetrySchema.safeParse(json)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'invalid' }, { status: 400 })
+    return error('invalid', 400)
   }
   try {
     await prisma.telemetry.create({ data: parsed.data })
   } catch (err) {
-    console.error('telemetry insert failed', err)
-    return NextResponse.json({ error: 'server error' }, { status: 500 })
+    console.warn('telemetry insert failed', {
+      error: err instanceof Error ? err.message : String(err),
+    })
+    return error('server error', 500)
   }
-  return NextResponse.json({ ok: true })
+  return ok({ ok: true })
 }
 
 export async function GET(req: Request) {
@@ -52,9 +61,10 @@ export async function GET(req: Request) {
   if (eventType) where.eventType = eventType
   if (since) {
     const date = new Date(since)
-    if (!isNaN(date.getTime())) {
-      where.createdAt = { gte: date }
+    if (isNaN(date.getTime())) {
+      return error('invalid since', 400)
     }
+    where.createdAt = { gte: date }
   }
 
   const data = await prisma.telemetry.findMany({
@@ -63,5 +73,5 @@ export async function GET(req: Request) {
     take: 100,
   })
 
-  return NextResponse.json(data)
+  return ok(data)
 }

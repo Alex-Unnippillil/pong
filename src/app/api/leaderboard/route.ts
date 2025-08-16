@@ -1,11 +1,17 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { ok, error } from '@/lib/api-response'
+
+export const leaderboardQueryOptions = {
+  take: 10,
+  orderBy: { elo: 'desc' },
+  include: { user: true },
+} as const
 
 export async function GET() {
-  const data = await prisma.leaderboard.findMany({
-    take: 10,
-    orderBy: { elo: 'desc' },
-    include: { user: true },
-  })
-  return NextResponse.json(data)
+  try {
+    const result = await prisma.leaderboard.findMany(leaderboardQueryOptions)
+    return ok(result)
+  } catch {
+    return error('server error', 500)
+  }
 }

@@ -40,7 +40,9 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error(e)
+    console.warn('seed failed', {
+      error: e instanceof Error ? e.message : String(e),
+    })
     process.exit(1)
   })
   .finally(async () => {
