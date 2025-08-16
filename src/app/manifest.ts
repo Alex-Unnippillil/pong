@@ -1,10 +1,12 @@
 import { MetadataRoute } from 'next'
+import { getTranslations } from 'next-intl/server'
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const t = await getTranslations()
   return {
-    name: 'PhotonPong',
-    short_name: 'PhotonPong',
-    description: 'Modern Pong game',
+    name: t('title'),
+    short_name: t('title'),
+    description: t('description'),
     start_url: '/',
     display: 'standalone',
     background_color: '#000000',

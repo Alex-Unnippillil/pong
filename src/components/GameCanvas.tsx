@@ -1,30 +1,29 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import Phaser from 'phaser'
 
-export function GameCanvas() {
+import { usePhaserGame } from '../hooks/usePhaserGame'
+import { useSettings } from '../store/settings'
+
+export function GameCanvas({ matchId }: { matchId?: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const muted = useSettings((s) => s.muted)
+  const gameRef = usePhaserGame(containerRef, muted, matchId)
 
   useEffect(() => {
-    if (!containerRef.current) return
+    const handleResize = () => {
+      if (!containerRef.current || !gameRef.current) return
+      gameRef.current.scale.resize(
+        containerRef.current.clientWidth,
+        containerRef.current.clientHeight,
+      )
+    }
 
-    const game = new Phaser.Game({
-      type: Phaser.AUTO,
-      parent: containerRef.current,
-      width: 800,
-      height: 600,
-      scene: {
-        preload() {},
-        create() {},
-        update() {},
-      },
-    })
-
+    window.addEventListener('resize', handleResize)
     return () => {
-      game.destroy(true)
+      window.removeEventListener('resize', handleResize)
     }
   }, [])
 
-  return <div ref={containerRef} />
+  return <div ref={containerRef} className="w-full h-full" />
 }

@@ -1,16 +1,53 @@
 # PhotonPong
 
+[![codecov](https://codecov.io/gh/mirrors/pong/branch/main/graph/badge.svg)](https://codecov.io/gh/mirrors/pong)
+
 Modern Pong built with Next.js, Phaser 3, and a serverless stack.
 
 ## Setup
 
 ```bash
+
 pnpm install
 pnpm prisma migrate dev
 pnpm dev
 ```
 
 Copy `.env.example` to `.env.local` and fill in secrets.
+
+This project includes an [EditorConfig](https://editorconfig.org/) file to enforce
+2-space indentation, UTF-8 encoding, and final newlines.
+
+### Environment variables
+
+Set the following environment variables for the application:
+
+- `DATABASE_URL` – Postgres connection string
+- `NEXTAUTH_URL` – Base URL for NextAuth callbacks
+- `EMAIL_SERVER` – SMTP server connection string
+- `EMAIL_FROM` – Sender email address
+- `GITHUB_ID` – GitHub OAuth client ID
+- `GITHUB_SECRET` – GitHub OAuth client secret
+- `AUTH_SECRET` – NextAuth secret
+- `NEXT_PUBLIC_SUPABASE_URL` – Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` – Supabase anonymous API key
+- `UPSTASH_REDIS_URL` – Upstash Redis REST URL
+- `UPSTASH_REDIS_TOKEN` – Upstash Redis REST token
+
+Optional variables:
+
+- `NEXT_PUBLIC_POSTHOG_KEY` – PostHog client key
+- `NEXT_PUBLIC_POSTHOG_HOST` – PostHog host URL
+- `MATCHMAKING_QUEUE_TTL_SECONDS` – TTL in seconds for the matchmaking queue (default 60)
+
+Use these names when setting deployment secrets.
+
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm e2e --browser=chromium
+
+````
 
 ## Architecture Overview
 
@@ -23,11 +60,37 @@ graph LR
   A -->|HTTP| C[Next.js API Routes]
   C --> D[(Postgres)]
   C --> E[(Upstash Redis)]
+````
+
+## Background jobs
+
+When a match score is reported, a message is published to the `leaderboard:recalc`
+Redis channel. Start the worker to rebuild the leaderboard asynchronously:
+
+```bash
+pnpm worker:leaderboard
 ```
+
+## Offline Testing
+
+The Playwright suite includes an automated offline test:
+
+```bash
+pnpm e2e --browser=chromium
+```
+
+It launches the app, waits for the service worker to register, disables
+network access, and ensures the `GameCanvas` continues animating.
+
+To verify manually:
+
+1. Run `pnpm dev` and open the app in your browser.
+2. In DevTools, confirm the service worker is registered under **Application → Service Workers**.
+3. Switch the Network panel to **Offline** and reload the page.
+4. The app should load using cached assets even without a network connection.
 
 ## Troubleshooting
 
 - Ensure Postgres database is reachable via `DATABASE_URL`.
 - Run `pnpm prisma migrate dev` after changing the schema.
 - If Playwright tests fail, install browsers with `npx playwright install`.
-- Internationalization: currently only English is provided; add more locales under `src/locales/` as needed.

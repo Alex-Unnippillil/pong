@@ -3,6 +3,11 @@ import Script from 'next/script'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { AnalyticsProvider } from '../components/AnalyticsProvider'
+import { AuthButtons } from '../components/AuthButtons'
+import { LanguageSwitcher } from '../components/LanguageSwitcher'
+import { MuteButton } from '../components/MuteButton'
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages, getLocale, getTranslations } from 'next-intl/server'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -14,23 +19,36 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
-export const metadata: Metadata = {
-  title: 'PhotonPong',
-  description: 'Modern Pong game',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations()
+  return {
+    title: t('title'),
+    description: t('description'),
+  }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AnalyticsProvider />
-        {children}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <AnalyticsProvider />
+          <header className="p-4 flex gap-2">
+            <AuthButtons />
+            <LanguageSwitcher />
+            <MuteButton />
+          </header>
+          {children}
+        </NextIntlClientProvider>
         <Script id="sw" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
