@@ -1,21 +1,36 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export default function PlayPage() {
   const router = useRouter()
   const [status, setStatus] = useState<
     'idle' | 'searching' | 'timeout' | 'error'
   >('idle')
+  const controllerRef = useRef<AbortController | null>(null)
+
+  useEffect(() => {
+    return () => {
+      controllerRef.current?.abort()
+      setStatus('idle')
+    }
+  }, [])
 
   const queueForMatch = async () => {
+    controllerRef.current?.abort()
+    const controller = new AbortController()
+    controllerRef.current = controller
+
     setStatus('searching')
     const start = Date.now()
     const TIMEOUT_MS = 15000
     try {
       while (Date.now() - start < TIMEOUT_MS) {
-        const res = await fetch('/api/matchmaking', { method: 'POST' })
+        const res = await fetch('/api/matchmaking', {
+          method: 'POST',
+          signal: controller.signal,
+        })
         if (!res.ok) {
           setStatus('error')
           return
@@ -29,7 +44,15 @@ export default function PlayPage() {
       }
       setStatus('timeout')
     } catch {
-      setStatus('error')
+      if (controller.signal.aborted) {
+        setStatus('idle')
+      } else {
+        setStatus('error')
+      }
+    } finally {
+      controller.abort()
+      controllerRef.current = null
+      setStatus((prev) => (prev === 'searching' ? 'idle' : prev))
     }
   }
 
