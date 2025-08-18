@@ -67,20 +67,45 @@ async function recomputeLeaderboard() {
         losses: s.losses,
         streak: s.streak > 0 ? s.streak : 0,
       },
-    })
+    }),
   )
 
   await prisma.$transaction(ops)
 }
 
+function reportError(err: unknown, context?: Record<string, unknown>) {
+  const g = globalThis as any
+  if (g.Sentry?.captureException) {
+    g.Sentry.captureException(err, { extra: context })
+  }
+  if (g.posthog?.capture) {
+    g.posthog.capture({
+      distinctId: 'leaderboard-worker',
+      event: 'leaderboard_recalc_error',
+      properties: { ...context, error: (err as Error).message },
+    })
+  }
+}
+
 async function main() {
-  await recomputeLeaderboard()
+  try {
+    await recomputeLeaderboard()
+    console.log('Recomputed leaderboard')
+  } catch (err) {
+    console.error('Failed to recompute leaderboard', err)
+    reportError(err)
+  }
   const sub = redis.subscribe('leaderboard:recalc')
   console.log('Subscribed to leaderboard:recalc')
-  sub.on('message', () => {
-    recomputeLeaderboard().catch((err) =>
-      console.error('Failed to recompute leaderboard', err)
-    )
+  sub.on('message', async (_, message) => {
+    const ctx = { matchId: message }
+    try {
+      await recomputeLeaderboard()
+      console.log('Recomputed leaderboard', ctx)
+    } catch (err) {
+      console.error('Failed to recompute leaderboard', ctx, err)
+      reportError(err, ctx)
+    }
   })
 }
 
