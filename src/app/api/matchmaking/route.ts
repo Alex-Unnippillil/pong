@@ -15,12 +15,13 @@ export const runtime = 'nodejs'
 const QUEUE_KEY = 'matchmaking:queue'
 
 export async function POST(req: Request) {
+  if (!redis) {
+    return error('service unavailable', 503)
+  }
+
   const session = await getServerAuthSession()
   if (!session?.user) {
     return error('unauthenticated', 401)
-  }
-  if (!redis) {
-    return error('service unavailable', 503)
   }
   const userId = session.user.id
   try {
