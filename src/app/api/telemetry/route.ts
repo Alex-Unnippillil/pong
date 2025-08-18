@@ -23,6 +23,9 @@ const RATE_LIMIT_WINDOW_SECONDS = 60
 const RATE_LIMIT_MAX_REQUESTS = 60
 
 export async function POST(req: Request) {
+  if (!redis) {
+    return error('service unavailable', 503)
+  }
   const ip =
     req.headers.get('x-forwarded-for') ??
     req.headers.get('x-real-ip') ??

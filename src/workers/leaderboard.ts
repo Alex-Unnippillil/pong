@@ -73,8 +73,24 @@ async function recomputeLeaderboard() {
   await prisma.$transaction(ops)
 }
 
+interface AnalyticsGlobal {
+  Sentry?: {
+    captureException: (
+      err: unknown,
+      options?: { extra?: Record<string, unknown> },
+    ) => void
+  }
+  posthog?: {
+    capture: (data: {
+      distinctId: string
+      event: string
+      properties: Record<string, unknown>
+    }) => void
+  }
+}
+
 function reportError(err: unknown, context?: Record<string, unknown>) {
-  const g = globalThis as any
+  const g = globalThis as AnalyticsGlobal
   if (g.Sentry?.captureException) {
     g.Sentry.captureException(err, { extra: context })
   }
@@ -88,6 +104,10 @@ function reportError(err: unknown, context?: Record<string, unknown>) {
 }
 
 async function main() {
+  if (!redis) {
+    console.warn('Redis not configured, exiting leaderboard worker')
+    return
+  }
   try {
     await recomputeLeaderboard()
     console.log('Recomputed leaderboard')

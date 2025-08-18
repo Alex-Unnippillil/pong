@@ -19,6 +19,9 @@ export async function POST(req: Request) {
   if (!session?.user) {
     return error('unauthenticated', 401)
   }
+  if (!redis) {
+    return error('service unavailable', 503)
+  }
   const userId = session.user.id
   try {
     const json = await req.json().catch(() => ({}))
