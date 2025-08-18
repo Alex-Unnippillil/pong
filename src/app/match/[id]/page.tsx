@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { useSettings } from '@/store/settings'
 import { usePhaserGame } from '@/hooks/usePhaserGame'
+import { ChatBox } from '@/components/ChatBox'
 
 export default function MatchPage({ params }: { params: { id: string } }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -26,6 +27,7 @@ export default function MatchPage({ params }: { params: { id: string } }) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8">
       <div ref={containerRef} className="w-full h-full" />
+      <ChatBox matchId={params.id} />
     </main>
   )
 }
