@@ -5,5 +5,6 @@ test('leaderboard page lists players', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Leaderboard' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Wins' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Losses' })).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: 'Streak' })).toBeVisible()
   await expect(page.getByRole('row').nth(1)).toBeVisible()
 })
