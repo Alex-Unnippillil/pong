@@ -105,8 +105,9 @@ function reportError(err: unknown, context?: Record<string, unknown>) {
 
 async function main() {
   if (!redis) {
-    console.warn('Redis not configured, exiting leaderboard worker')
-    return
+    console.warn(
+      'Redis not configured, real-time leaderboard updates are disabled',
+    )
   }
   try {
     await recomputeLeaderboard()
@@ -115,7 +116,10 @@ async function main() {
     console.error('Failed to recompute leaderboard', err)
     reportError(err)
   }
-  const sub = redis.subscribe('leaderboard:recalc')
+  if (!redis) {
+    return
+  }
+  const sub = await redis.subscribe('leaderboard:recalc')
   console.log('Subscribed to leaderboard:recalc')
   sub.on('message', async (_, message) => {
     const ctx = { matchId: message }
