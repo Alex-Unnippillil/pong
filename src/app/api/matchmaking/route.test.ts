@@ -58,6 +58,7 @@ describe('matchmaking API', () => {
     expect(redis.set).toHaveBeenCalledWith(
       'match:m1',
       JSON.stringify({ p1: 'u1', p2: 'u2' }),
+      { ex: 3600 },
     )
   })
 

@@ -42,6 +42,7 @@ export async function POST(req: Request) {
     await redis.set(
       `match:${match.id}`,
       JSON.stringify({ p1: opponent, p2: userId }),
+      { ex: env.MATCH_TTL_SECONDS },
     )
     return ok({ p1: opponent, p2: userId, matchId: match.id })
   } catch {
