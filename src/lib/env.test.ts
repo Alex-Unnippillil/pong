@@ -33,6 +33,7 @@ describe('env validation', () => {
     expect(env.DATABASE_URL).toBe(baseEnv.DATABASE_URL)
     expect(env.NEXTAUTH_URL).toBe(baseEnv.NEXTAUTH_URL)
     expect(env.MATCHMAKING_QUEUE_TTL_SECONDS).toBe(60)
+    expect(env.MATCH_TTL_SECONDS).toBe(3600)
   })
 
   it('throws when required env var is missing', async () => {
@@ -50,6 +51,11 @@ describe('env validation', () => {
     await expect(import('./env.server')).rejects.toThrow(
       /MATCHMAKING_QUEUE_TTL_SECONDS/,
     )
+  })
+
+  it('throws when MATCH_TTL_SECONDS is invalid', async () => {
+    process.env.MATCH_TTL_SECONDS = 'abc'
+    await expect(import('./env.server')).rejects.toThrow(/MATCH_TTL_SECONDS/)
   })
 
   it('throws when DATABASE_URL is missing', async () => {

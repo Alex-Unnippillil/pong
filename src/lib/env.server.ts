@@ -15,6 +15,7 @@ const envSchema = z.object({
   UPSTASH_REDIS_URL: z.string().url(),
   UPSTASH_REDIS_TOKEN: z.string(),
   MATCHMAKING_QUEUE_TTL_SECONDS: z.coerce.number().int().positive().default(60),
+  MATCH_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
 })
 
 const parsed = envSchema.safeParse(process.env)
