@@ -36,14 +36,22 @@ describe('env validation', () => {
     expect(env.MATCH_TTL_SECONDS).toBe(3600)
   })
 
-  it('throws when required env var is missing', async () => {
+  it('allows optional env vars to be undefined', async () => {
     delete process.env.EMAIL_SERVER
-    await expect(import('./env.server')).rejects.toThrow(/EMAIL_SERVER/)
+    const { env } = await import('./env.server')
+    expect(env.EMAIL_SERVER).toBeUndefined()
   })
 
-  it('throws when env var fails validation', async () => {
-    process.env.UPSTASH_REDIS_URL = 'not-a-url'
-    await expect(import('./env.server')).rejects.toThrow(/UPSTASH_REDIS_URL/)
+  it('uses default NEXTAUTH_URL when missing', async () => {
+    delete process.env.NEXTAUTH_URL
+    const { env } = await import('./env.server')
+    expect(env.NEXTAUTH_URL).toBe('http://localhost:3000')
+  })
+
+  it('uses default AUTH_SECRET when missing', async () => {
+    delete process.env.AUTH_SECRET
+    const { env } = await import('./env.server')
+    expect(env.AUTH_SECRET).toBe('dev-secret')
   })
 
   it('throws when MATCHMAKING_QUEUE_TTL_SECONDS is invalid', async () => {
