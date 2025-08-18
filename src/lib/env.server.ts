@@ -12,8 +12,8 @@ const envSchema = z.object({
   GITHUB_ID: z.string(),
   GITHUB_SECRET: z.string(),
   AUTH_SECRET: z.string(),
-  UPSTASH_REDIS_URL: z.string().url(),
-  UPSTASH_REDIS_TOKEN: z.string(),
+  UPSTASH_REDIS_URL: z.string().url().optional(),
+  UPSTASH_REDIS_TOKEN: z.string().optional(),
   MATCHMAKING_QUEUE_TTL_SECONDS: z.coerce.number().int().positive().default(60),
   MATCH_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
 })
