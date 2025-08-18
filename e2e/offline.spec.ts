@@ -20,3 +20,16 @@ test('game continues offline after service worker registration', async ({
   )
   expect(frame1).not.toBe(frame2)
 })
+
+test('offline navigation works after initial load', async ({ page }) => {
+  await page.goto('http://localhost:3000')
+  await page.waitForFunction(() => navigator.serviceWorker?.controller)
+
+  await page.context().setOffline(true)
+
+  await page.goto('http://localhost:3000/play')
+  await expect(page.locator('button', { hasText: 'Play Online' })).toBeVisible()
+
+  await page.goto('http://localhost:3000/match/1')
+  await expect(page.locator('canvas')).toBeVisible()
+})
