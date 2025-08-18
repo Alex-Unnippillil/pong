@@ -11,4 +11,9 @@ export function initAnalytics() {
   } else {
     posthog.init(key)
   }
+=======
+  const options = env.NEXT_PUBLIC_POSTHOG_HOST
+    ? { api_host: env.NEXT_PUBLIC_POSTHOG_HOST }
+    : undefined
+  posthog.init(key, options)
 }
