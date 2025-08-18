@@ -26,6 +26,7 @@ export async function POST(req: Request) {
   if (!redis) {
     return error('service unavailable', 503)
   }
+
   const ip =
     req.headers.get('x-forwarded-for') ??
     req.headers.get('x-real-ip') ??
