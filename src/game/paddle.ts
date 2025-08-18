@@ -1,3 +1,5 @@
+import { clamp } from '../utils/physics'
+
 export function movePaddle(
   y: number,
   direction: number,
@@ -8,8 +10,7 @@ export function movePaddle(
 ): number {
   let newY = y + direction * speed * dt
   const half = paddleHeight / 2
-  if (newY < half) newY = half
-  if (newY > screenHeight - half) newY = screenHeight - half
+  newY = clamp(newY, half, screenHeight - half)
   return newY
 }
 
