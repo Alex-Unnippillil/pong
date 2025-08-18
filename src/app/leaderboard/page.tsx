@@ -7,6 +7,7 @@ interface LeaderboardEntry {
   elo: number
   wins: number
   losses: number
+  streak: number
   user: {
     name: string | null
   } | null
@@ -28,6 +29,7 @@ export default async function LeaderboardPage() {
               <th className="px-4 py-2 text-left border-b">ELO</th>
               <th className="px-4 py-2 text-left border-b">Wins</th>
               <th className="px-4 py-2 text-left border-b">Losses</th>
+              <th className="px-4 py-2 text-left border-b">Streak</th>
             </tr>
           </thead>
           <tbody>
@@ -39,6 +41,7 @@ export default async function LeaderboardPage() {
                 <td className="px-4 py-2 border-b">{entry.elo}</td>
                 <td className="px-4 py-2 border-b">{entry.wins}</td>
                 <td className="px-4 py-2 border-b">{entry.losses}</td>
+                <td className="px-4 py-2 border-b">{entry.streak}</td>
               </tr>
             ))}
           </tbody>
