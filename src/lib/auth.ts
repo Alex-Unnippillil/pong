@@ -25,17 +25,20 @@ if (env.GITHUB_ID && env.GITHUB_SECRET) {
     }),
   )
 }
-
 if (providers.length === 0) {
-  throw new Error(
-    'No auth providers configured. Please set EMAIL_* or GITHUB_* environment variables.',
+  console.warn(
+    'No auth providers configured. Continuing without authentication.',
   )
 }
 
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
-  providers,
-  secret: env.AUTH_SECRET,
-}
+export const authOptions: NextAuthOptions | undefined =
+  providers.length > 0
+    ? {
+        adapter: PrismaAdapter(prisma),
+        providers,
+        secret: env.AUTH_SECRET,
+      }
+    : undefined
 
-export const getServerAuthSession = () => getServerSession(authOptions)
+export const getServerAuthSession = () =>
+  authOptions ? getServerSession(authOptions) : Promise.resolve(null)
