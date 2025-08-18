@@ -4,7 +4,7 @@ vi.mock('@/lib/prisma', () => ({
   prisma: { match: { create: vi.fn() } },
 }))
 
-import { POST } from './route'
+import { POST, DELETE } from './route'
 import { getServerAuthSession } from '@/lib/auth'
 import { redis } from '@/lib/redis'
 import { prisma } from '@/lib/prisma'
@@ -106,5 +106,15 @@ describe('matchmaking API', () => {
     expect(res.status).toBe(400)
     expect(await res.json()).toEqual({ error: 'invalid mode' })
     expect(redis.lpop).not.toHaveBeenCalled()
+  })
+
+  it('removes user from queue on cancel', async () => {
+    sessionMock.mockResolvedValueOnce({ user: { id: 'u1' } })
+    vi.mocked(redis.lrem).mockResolvedValueOnce(1)
+    const res = await DELETE(
+      new Request('http://localhost/api', { method: 'DELETE' }),
+    )
+    expect(res.status).toBe(200)
+    expect(redis.lrem).toHaveBeenCalledWith('matchmaking:queue', 0, 'u1')
   })
 })

@@ -8,9 +8,10 @@ vi.mock('../../../lib/prisma', () => ({
     },
   },
 }))
-
-vi.mock('../../../lib/auth', () => ({
-
+vi.mock('../../../lib/leaderboard', () => ({
+  triggerLeaderboardRecalculation: vi.fn(),
+}))
+import { POST } from './route'
 import { prisma } from '../../../lib/prisma'
 import { getServerAuthSession } from '../../../lib/auth'
 import { triggerLeaderboardRecalculation } from '../../../lib/leaderboard'

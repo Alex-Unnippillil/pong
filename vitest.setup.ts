@@ -17,6 +17,7 @@ vi.mock('@/lib/redis', () => {
     rpush: vi.fn(),
     set: vi.fn(),
     del: vi.fn(),
+    lrem: vi.fn(),
   }
   return { redis }
 })

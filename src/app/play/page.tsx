@@ -56,6 +56,16 @@ export default function PlayPage() {
     }
   }
 
+  const cancel = async () => {
+    controllerRef.current?.abort()
+    setStatus('idle')
+    try {
+      await fetch('/api/matchmaking', { method: 'DELETE' })
+    } catch {
+      // ignore
+    }
+  }
+
   const retry = () => {
     void queueForMatch()
   }
@@ -70,7 +80,17 @@ export default function PlayPage() {
           Play Online
         </button>
       )}
-      {status === 'searching' && <p>Searching for an opponent...</p>}
+      {status === 'searching' && (
+        <div className="flex flex-col items-center gap-2">
+          <p>Searching for an opponent...</p>
+          <button
+            className="px-4 py-2 bg-gray-500 text-white rounded"
+            onClick={cancel}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
       {status === 'timeout' && (
         <div className="flex flex-col items-center gap-2">
           <p>Queue timed out.</p>

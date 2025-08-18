@@ -48,3 +48,18 @@ export async function POST(req: Request) {
     return error('queue error', 500)
   }
 }
+
+export async function DELETE() {
+  const session = await getServerAuthSession()
+  if (!session?.user) {
+    return error('unauthenticated', 401)
+  }
+  const userId = session.user.id
+  try {
+    await redis.lrem(QUEUE_KEY, 0, userId)
+    await redis.del(`match:${userId}`)
+    return ok({ removed: true })
+  } catch {
+    return error('queue error', 500)
+  }
+}
