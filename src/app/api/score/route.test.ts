@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 
-vi.mock('../../../lib/prisma', () => ({
+vi.mock('@/lib/prisma', () => ({
   prisma: {
     match: {
       findUnique: vi.fn(),
@@ -9,11 +9,18 @@ vi.mock('../../../lib/prisma', () => ({
   },
 }))
 
-vi.mock('../../../lib/auth', () => ({
+vi.mock('@/lib/auth', () => ({
+  getServerAuthSession: vi.fn(),
+}))
 
-import { prisma } from '../../../lib/prisma'
-import { getServerAuthSession } from '../../../lib/auth'
-import { triggerLeaderboardRecalculation } from '../../../lib/leaderboard'
+vi.mock('@/lib/leaderboard', () => ({
+  triggerLeaderboardRecalculation: vi.fn(),
+}))
+
+import { POST } from './route'
+import { prisma } from '@/lib/prisma'
+import { getServerAuthSession } from '@/lib/auth'
+import { triggerLeaderboardRecalculation } from '@/lib/leaderboard'
 
 describe('score API', () => {
   it('updates match score', async () => {
