@@ -21,5 +21,31 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return error('invalid', 400)
   }
+  const { matchId, p1Score, p2Score } = parsed.data
 
+  try {
+    const match = await prisma.match.findUnique({ where: { id: matchId } })
+    if (!match) {
+      return error('not-found', 404)
+    }
+    const userId = session.user.id
+    if (match.p1Id !== userId && match.p2Id !== userId) {
+      return error('forbidden', 403)
+    }
+    if (match.endedAt) {
+      return error('already-completed', 409)
+    }
+    if (p1Score === p2Score) {
+      return error('invalid-score', 400)
+    }
+    const winnerId = p1Score > p2Score ? match.p1Id : match.p2Id
+    await prisma.match.update({
+      where: { id: matchId },
+      data: { p1Score, p2Score, winnerId, endedAt: new Date() },
+    })
+    await triggerLeaderboardRecalculation()
+    return ok({ ok: true })
+  } catch (err) {
+    return error('server error', 500)
+  }
 }
