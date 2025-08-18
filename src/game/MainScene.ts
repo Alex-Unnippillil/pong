@@ -93,6 +93,13 @@ export default class MainScene extends Phaser.Scene {
           this.lastRemoteUpdate = Date.now()
         })
       void this.channel.subscribe()
+    } else if (this.matchId && !supabase) {
+      this.add
+        .text(width / 2, height / 2, 'Supabase is unavailable', {
+          color: '#fff',
+          fontSize: '16px',
+        })
+        .setOrigin(0.5)
     }
 
     this.events.once(Phaser.Scenes.Events.DESTROY, () => {
