@@ -10,10 +10,17 @@ vi.mock('../../../lib/prisma', () => ({
 }))
 
 vi.mock('../../../lib/auth', () => ({
+  getServerAuthSession: vi.fn(),
+}))
+
+vi.mock('../../../lib/leaderboard', () => ({
+  triggerLeaderboardRecalculation: vi.fn(),
+}))
 
 import { prisma } from '../../../lib/prisma'
 import { getServerAuthSession } from '../../../lib/auth'
 import { triggerLeaderboardRecalculation } from '../../../lib/leaderboard'
+import { POST } from './route'
 
 describe('score API', () => {
   it('updates match score', async () => {
@@ -130,11 +137,18 @@ describe('score API', () => {
   })
 
   it('returns 500 on update failure', async () => {
+    vi.mocked(getServerAuthSession).mockResolvedValue({ user: { id: 'p1' } })
+    prisma.match.findUnique.mockResolvedValue({
+      id: 'm1',
+      p1Id: 'p1',
+      p2Id: 'p2',
+      endedAt: null,
+    })
+
     const body = {
       matchId: 'm1',
       p1Score: 10,
       p2Score: 5,
-      winnerId: 'p1',
     }
     vi.mocked(prisma.match.update).mockRejectedValueOnce(new Error('fail'))
     const res = await POST(jsonRequest(body))
@@ -142,5 +156,6 @@ describe('score API', () => {
 
     expect(res.status).toBe(500)
     expect(json).toEqual({ error: 'server error' })
+    expect(triggerLeaderboardRecalculation).not.toHaveBeenCalled()
   })
 })
