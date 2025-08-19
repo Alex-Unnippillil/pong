@@ -42,7 +42,7 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AnalyticsProvider />
-          <header className="p-4 flex gap-2">
+          <header className="flex items-center justify-between gap-2 p-4">
             <AuthButtons />
             <LanguageSwitcher />
             <MuteButton />
