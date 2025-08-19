@@ -23,7 +23,7 @@ export function usePhaserGame(
           parent: containerRef.current!,
           width: containerRef.current!.clientWidth,
           height: containerRef.current!.clientHeight,
-          scene: new MainScene(matchId),
+          scene: new MainScene(matchId, Boolean(matchId)),
         }
         gameRef.current = new Phaser.Game(config)
       }

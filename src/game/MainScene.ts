@@ -22,10 +22,12 @@ export default class MainScene extends Phaser.Scene {
   private remoteBall: { x: number; y: number; vx: number; vy: number } | null =
     null
   private lastRemoteUpdate = 0
+  private spectator = false
 
-  constructor(matchId?: string) {
+  constructor(matchId?: string, spectator = false) {
     super('MainScene')
     this.matchId = matchId
+    this.spectator = spectator
   }
 
   preload() {
@@ -211,5 +213,21 @@ export default class MainScene extends Phaser.Scene {
         velY: this.velocity.y,
       },
     })
+
+    if (this.spectator && this.matchId) {
+      void fetch(`/api/match/${this.matchId}/spectate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paddleY: this.player.y,
+          opponentY: this.opponent.y,
+          ballX: this.ball.x,
+          ballY: this.ball.y,
+          playerScore: this.score.playerScore,
+          opponentScore: this.score.opponentScore,
+        }),
+        keepalive: true,
+      })
+    }
   }
 }
