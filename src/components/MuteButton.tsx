@@ -2,15 +2,20 @@
 
 import React from 'react'
 import { useSettings } from '../store/settings'
+import { Button } from './ui/Button'
 
 export function MuteButton() {
   const muted = useSettings((s) => s.muted)
   const toggleMuted = useSettings((s) => s.toggleMuted)
 
   return (
-    <button onClick={toggleMuted} aria-label={muted ? 'Unmute' : 'Mute'}>
+    <Button
+      onClick={toggleMuted}
+      aria-label={muted ? 'Unmute' : 'Mute'}
+      variant="secondary"
+    >
       {muted ? 'Unmute' : 'Mute'}
-    </button>
+    </Button>
   )
 }
 

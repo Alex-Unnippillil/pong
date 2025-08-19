@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { signIn, signOut, useSession } from 'next-auth/react'
+import { Button } from './ui/Button'
 
 export function AuthButtons() {
   const { data: session } = useSession()
@@ -11,12 +12,18 @@ export function AuthButtons() {
     return (
       <div>
         <span>Signed in as {userLabel}</span>
-        <button onClick={() => signOut()}>Sign out</button>
+        <Button onClick={() => signOut()} variant="primary">
+          Sign out
+        </Button>
       </div>
     )
   }
 
-  return <button onClick={() => signIn()}>Sign in</button>
+  return (
+    <Button onClick={() => signIn()} variant="primary">
+      Sign in
+    </Button>
+  )
 }
 
 export default AuthButtons
