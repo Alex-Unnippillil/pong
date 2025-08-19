@@ -7,7 +7,7 @@ import { env } from '@/lib/env.server'
 import { ok, error } from '@/lib/api-response'
 
 const bodySchema = z.object({
-  mode: z.enum(['classic']).default('classic'),
+  mode: z.enum(['classic', 'ranked']).default('classic'),
 })
 
 export const runtime = 'nodejs'

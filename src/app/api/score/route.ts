@@ -38,6 +38,11 @@ export async function POST(req: Request) {
     if (p1Score === p2Score) {
       return error('invalid-score', 400)
     }
+
+    const targetScore = match.mode === 'ranked' ? 15 : 10
+    if (p1Score < targetScore && p2Score < targetScore) {
+      return error('invalid-score', 400)
+    }
     const winnerId = p1Score > p2Score ? match.p1Id : match.p2Id
     await prisma.match.update({
       where: { id: matchId },

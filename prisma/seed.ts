@@ -27,7 +27,7 @@ async function main() {
 
   await prisma.match.create({
     data: {
-      mode: 'singleplayer',
+      mode: 'classic',
       p1Id: alice.id,
       p2Id: bob.id,
       p1Score: 11,

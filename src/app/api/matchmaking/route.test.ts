@@ -17,7 +17,7 @@ describe('matchmaking API', () => {
     vi.mocked(redis.lpop).mockResolvedValueOnce(null)
     vi.mocked(redis.lpos).mockResolvedValueOnce(null)
 
-    const res = await POST(jsonRequest({ mode: 'classic' }))
+    const res = await POST(jsonRequest({ mode: 'ranked' }))
     const json = await res.json()
 
     expect(res.status).toBe(200)
@@ -31,7 +31,7 @@ describe('matchmaking API', () => {
     vi.mocked(redis.lpop).mockResolvedValueOnce('u1')
     vi.mocked(redis.lpos).mockResolvedValueOnce(0)
 
-    const res = await POST(jsonRequest({ mode: 'classic' }))
+    const res = await POST(jsonRequest({ mode: 'ranked' }))
     const json = await res.json()
 
     expect(res.status).toBe(200)
@@ -47,13 +47,13 @@ describe('matchmaking API', () => {
       id: 'm1',
     } as unknown as { id: string })
 
-    const res = await POST(jsonRequest({ mode: 'classic' }))
+    const res = await POST(jsonRequest({ mode: 'ranked' }))
     const json = await res.json()
 
     expect(res.status).toBe(200)
     expect(json).toEqual({ p1: 'u1', p2: 'u2', matchId: 'm1' })
     expect(prisma.match.create).toHaveBeenCalledWith({
-      data: { p1Id: 'u1', p2Id: 'u2', mode: 'classic', p1Score: 0, p2Score: 0 },
+      data: { p1Id: 'u1', p2Id: 'u2', mode: 'ranked', p1Score: 0, p2Score: 0 },
     })
     expect(redis.set).toHaveBeenCalledWith(
       'match:m1',

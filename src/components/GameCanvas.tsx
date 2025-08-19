@@ -5,10 +5,16 @@ import { useEffect, useRef } from 'react'
 import { usePhaserGame } from '../hooks/usePhaserGame'
 import { useSettings } from '../store/settings'
 
-export function GameCanvas({ matchId }: { matchId?: string }) {
+export function GameCanvas({
+  matchId,
+  mode,
+}: {
+  matchId?: string
+  mode?: 'classic' | 'ranked'
+}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const muted = useSettings((s) => s.muted)
-  const gameRef = usePhaserGame(containerRef, muted, matchId)
+  const gameRef = usePhaserGame(containerRef, muted, matchId, mode)
 
   useEffect(() => {
     const handleResize = () => {

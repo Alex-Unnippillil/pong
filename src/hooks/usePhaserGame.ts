@@ -9,6 +9,7 @@ export function usePhaserGame(
   containerRef: React.RefObject<HTMLDivElement>,
   muted: boolean,
   matchId?: string,
+  mode?: 'classic' | 'ranked',
 ) {
   const gameRef = useRef<PhaserModule.Game | null>(null)
 
@@ -23,7 +24,7 @@ export function usePhaserGame(
           parent: containerRef.current!,
           width: containerRef.current!.clientWidth,
           height: containerRef.current!.clientHeight,
-          scene: new MainScene(matchId),
+          scene: new MainScene(matchId, mode),
         }
         gameRef.current = new Phaser.Game(config)
       }
@@ -31,7 +32,7 @@ export function usePhaserGame(
     }
 
     void init()
-  }, [muted, containerRef, matchId])
+  }, [muted, containerRef, matchId, mode])
 
   useEffect(() => {
     return () => {

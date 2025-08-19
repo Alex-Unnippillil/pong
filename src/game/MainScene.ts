@@ -15,17 +15,20 @@ export default class MainScene extends Phaser.Scene {
   private velocity = new Phaser.Math.Vector2(200, 200)
   private paddleSpeed = 300
   private paddleHeight = 100
-  private score = new ScoreManager()
+  private score: ScoreManager
   private matchId?: string
+  private mode: 'classic' | 'ranked'
   private channel?: RealtimeChannel
   private remotePaddleY: number | null = null
   private remoteBall: { x: number; y: number; vx: number; vy: number } | null =
     null
   private lastRemoteUpdate = 0
 
-  constructor(matchId?: string) {
+  constructor(matchId?: string, mode: 'classic' | 'ranked' = 'classic') {
     super('MainScene')
     this.matchId = matchId
+    this.mode = mode
+    this.score = new ScoreManager(mode === 'ranked' ? 15 : 10)
   }
 
   preload() {

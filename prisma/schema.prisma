@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum MatchMode {
+  classic
+  ranked
+}
+
 model User {
   id         String       @id @default(cuid())
   email      String       @unique
@@ -30,7 +35,7 @@ model Match {
   id        String   @id @default(cuid())
   startedAt DateTime @default(now())
   endedAt   DateTime?
-  mode      String
+  mode      MatchMode
   p1        User     @relation("MatchP1", fields: [p1Id], references: [id])
   p1Id      String
   p2        User?    @relation("MatchP2", fields: [p2Id], references: [id])

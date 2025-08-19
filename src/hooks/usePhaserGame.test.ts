@@ -35,7 +35,7 @@ describe('usePhaserGame', () => {
     const ref = { current: container } as React.RefObject<HTMLDivElement>
 
     const { rerender } = renderHook(
-      ({ muted }) => usePhaserGame(ref, muted, 'match'),
+      ({ muted }) => usePhaserGame(ref, muted, 'match', 'classic'),
       {
         initialProps: { muted: false },
       },
@@ -58,7 +58,9 @@ describe('usePhaserGame', () => {
     const container = document.createElement('div')
     const ref = { current: container } as React.RefObject<HTMLDivElement>
 
-    const { unmount } = renderHook(() => usePhaserGame(ref, false, 'match'))
+    const { unmount } = renderHook(() =>
+      usePhaserGame(ref, false, 'match', 'classic'),
+    )
 
     await waitFor(() => {
       expect(Game).toHaveBeenCalledTimes(1)

@@ -30,6 +30,7 @@ describe('score API', () => {
       p1Id: 'p1',
       p2Id: 'p2',
       endedAt: null,
+      mode: 'classic',
     })
 
     const body = {
@@ -74,6 +75,7 @@ describe('score API', () => {
       p1Id: 'p1',
       p2Id: 'p2',
       endedAt: null,
+      mode: 'classic',
     })
 
     const body = {
@@ -97,6 +99,7 @@ describe('score API', () => {
       p1Id: 'p1',
       p2Id: 'p2',
       endedAt: new Date(),
+      mode: 'classic',
     })
 
     const body = {
@@ -120,6 +123,7 @@ describe('score API', () => {
       p1Id: 'p1',
       p2Id: 'p2',
       endedAt: null,
+      mode: 'classic',
     })
 
     const body = {
@@ -137,6 +141,14 @@ describe('score API', () => {
   })
 
   it('returns 500 on update failure', async () => {
+    vi.mocked(getServerAuthSession).mockResolvedValue({ user: { id: 'p1' } })
+    prisma.match.findUnique.mockResolvedValue({
+      id: 'm1',
+      p1Id: 'p1',
+      p2Id: 'p2',
+      endedAt: null,
+      mode: 'classic',
+    })
     const body = {
       matchId: 'm1',
       p1Score: 10,
