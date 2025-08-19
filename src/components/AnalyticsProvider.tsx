@@ -8,10 +8,12 @@ let initialized = false
 
 export function AnalyticsProvider() {
   useEffect(() => {
-    if (!initialized && env.NEXT_PUBLIC_POSTHOG_KEY) {
+    const key = env.NEXT_PUBLIC_POSTHOG_KEY
+    if (!initialized && key) {
       initAnalytics()
       initialized = true
     }
   }, [])
+
   return null
 }
