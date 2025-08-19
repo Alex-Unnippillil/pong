@@ -14,6 +14,7 @@ const envSchema = z.object({
   AUTH_SECRET: z.string().default('dev-secret'),
   UPSTASH_REDIS_URL: z.string().optional(),
   UPSTASH_REDIS_TOKEN: z.string().optional(),
+  SENTRY_DSN: z.string().url().optional(),
   MATCHMAKING_QUEUE_TTL_SECONDS: z.coerce.number().int().positive().default(60),
   MATCH_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
 })

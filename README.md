@@ -38,10 +38,15 @@ Optional variables:
 
 - `NEXT_PUBLIC_POSTHOG_KEY` – PostHog client key
 - `NEXT_PUBLIC_POSTHOG_HOST` – PostHog host URL
+- `SENTRY_DSN` – Sentry DSN for server-side error tracking
+- `NEXT_PUBLIC_SENTRY_DSN` – Sentry DSN for client-side error tracking
 - `MATCHMAKING_QUEUE_TTL_SECONDS` – TTL in seconds for the matchmaking queue (default 60)
 - `MATCH_TTL_SECONDS` – TTL in seconds for stored match details (default 3600)
 
 Use these names when setting deployment secrets.
+
+With Sentry DSNs configured, the leaderboard worker and browser client will report
+uncaught exceptions to Sentry.
 
 pnpm lint
 pnpm typecheck
