@@ -50,3 +50,23 @@ describe('initAnalytics', () => {
     })
   })
 })
+
+describe('logTelemetry', () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals()
+  })
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('posts telemetry event', async () => {
+    const fetch = vi.fn().mockResolvedValue({ ok: true })
+    vi.stubGlobal('fetch', fetch)
+    const { logTelemetry } = await import('./analytics')
+    await logTelemetry('match_chat', { matchId: '1' })
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/telemetry',
+      expect.objectContaining({ method: 'POST' }),
+    )
+  })
+})
