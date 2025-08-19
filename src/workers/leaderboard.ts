@@ -1,11 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { redis } from '@/lib/redis'
 
-if (!redis) {
-  console.warn('Redis not configured, exiting leaderboard worker')
-  process.exit(0)
-}
-
 interface Stats {
   elo: number
   wins: number
@@ -109,6 +104,10 @@ function reportError(err: unknown, context?: Record<string, unknown>) {
 }
 
 async function main() {
+  if (!redis) {
+    console.warn('Redis not configured, exiting leaderboard worker')
+    return
+  }
   try {
     await recomputeLeaderboard()
     console.log('Recomputed leaderboard')
@@ -116,7 +115,7 @@ async function main() {
     console.error('Failed to recompute leaderboard', err)
     reportError(err)
   }
-  const sub = redis.subscribe('leaderboard:recalc')
+  const sub = await redis.subscribe('leaderboard:recalc')
   console.log('Subscribed to leaderboard:recalc')
   sub.on('message', async (_, message) => {
     const ctx = { matchId: message }
