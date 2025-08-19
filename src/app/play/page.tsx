@@ -2,9 +2,11 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 export default function PlayPage() {
   const router = useRouter()
+  const t = useTranslations('play')
   const [status, setStatus] = useState<
     'idle' | 'searching' | 'timeout' | 'error' | 'aborted'
   >('idle')
@@ -36,7 +38,7 @@ export default function PlayPage() {
         })
         if (!res.ok) {
           setStatus('error')
-          setReason('Matchmaking error')
+          setReason(t('matchmakingError'))
           return
         }
         const data = await res.json()
@@ -49,20 +51,20 @@ export default function PlayPage() {
         await new Promise((r) => setTimeout(r, delay))
       }
       setStatus('timeout')
-      setReason('No match found before timeout')
+      setReason(t('matchmakingTimeout'))
     } catch (err) {
       if (
         controller.signal.aborted ||
         (err instanceof DOMException && err.name === 'AbortError')
       ) {
         setStatus('aborted')
-        setReason('Matchmaking aborted')
+        setReason(t('matchmakingAborted'))
       } else if (err instanceof TypeError) {
         setStatus('error')
-        setReason('Server unreachable')
+        setReason(t('serverUnreachable'))
       } else {
         setStatus('error')
-        setReason('Matchmaking error')
+        setReason(t('matchmakingError'))
       }
     } finally {
       controller.abort()
@@ -82,29 +84,29 @@ export default function PlayPage() {
           className="px-4 py-2 bg-blue-500 text-white rounded"
           onClick={queueForMatch}
         >
-          Play Online
+          {t('playOnline')}
         </button>
       )}
-      {status === 'searching' && <p>Searching for an opponent...</p>}
+      {status === 'searching' && <p>{t('searching')}</p>}
       {status === 'timeout' && (
         <div className="flex flex-col items-center gap-2">
-          <p>{reason || 'Queue timed out.'}</p>
+          <p>{reason || t('queueTimedOut')}</p>
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded"
             onClick={retry}
           >
-            Retry
+            {t('retry')}
           </button>
         </div>
       )}
       {status === 'error' && (
         <div className="flex flex-col items-center gap-2">
-          <p>{reason || 'Something went wrong.'}</p>
+          <p>{reason || t('somethingWentWrong')}</p>
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded"
             onClick={retry}
           >
-            Retry
+            {t('retry')}
           </button>
         </div>
       )}
@@ -115,7 +117,7 @@ export default function PlayPage() {
             className="px-4 py-2 bg-blue-500 text-white rounded"
             onClick={retry}
           >
-            Retry
+            {t('retry')}
           </button>
         </div>
       )}

@@ -1,4 +1,25 @@
 {
   "title": "PhotonPong",
-  "description": "Modern Pong game"
+  "description": "Modern Pong game",
+  "play": {
+    "playOnline": "Play Online",
+    "searching": "Searching for an opponent...",
+    "queueTimedOut": "Queue timed out.",
+    "retry": "Retry",
+    "somethingWentWrong": "Something went wrong.",
+    "matchmakingError": "Matchmaking error",
+    "matchmakingTimeout": "No match found before timeout",
+    "matchmakingAborted": "Matchmaking aborted",
+    "serverUnreachable": "Server unreachable"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "name": "Name",
+    "elo": "ELO",
+    "wins": "Wins",
+    "losses": "Losses",
+    "streak": "Streak",
+    "unknown": "Unknown",
+    "unableToLoad": "Unable to load leaderboard data."
+  }
 }

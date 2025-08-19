@@ -1,4 +1,25 @@
 {
   "title": "PhotonPong",
-  "description": "Juego moderno de Pong"
+  "description": "Juego moderno de Pong",
+  "play": {
+    "playOnline": "Jugar en línea",
+    "searching": "Buscando un oponente...",
+    "queueTimedOut": "La cola expiró.",
+    "retry": "Reintentar",
+    "somethingWentWrong": "Algo salió mal.",
+    "matchmakingError": "Error de emparejamiento",
+    "matchmakingTimeout": "No se encontró una partida antes de expirar",
+    "matchmakingAborted": "Emparejamiento cancelado",
+    "serverUnreachable": "Servidor inaccesible"
+  },
+  "leaderboard": {
+    "title": "Tabla de clasificación",
+    "name": "Nombre",
+    "elo": "ELO",
+    "wins": "Victorias",
+    "losses": "Derrotas",
+    "streak": "Racha",
+    "unknown": "Desconocido",
+    "unableToLoad": "No se pudo cargar la tabla de clasificación."
+  }
 }
