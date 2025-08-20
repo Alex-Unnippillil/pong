@@ -39,6 +39,7 @@ model Match {
   p2Score   Int
   winner    User?    @relation("MatchWinner", fields: [winnerId], references: [id])
   winnerId  String?
+  chat      MatchChat[]
 }
 
 model Leaderboard {
@@ -50,6 +51,18 @@ model Leaderboard {
   streak    Int    @default(0)
   updatedAt DateTime @updatedAt
   @@index([elo])
+}
+
+model MatchChat {
+  id        String   @id @default(cuid())
+  match     Match    @relation(fields: [matchId], references: [id])
+  matchId   String
+  sender    User     @relation(fields: [senderId], references: [id])
+  senderId  String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([matchId])
 }
 
 model Telemetry {
