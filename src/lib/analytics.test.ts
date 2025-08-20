@@ -14,6 +14,10 @@ vi.mock('posthog-js', () => ({
   default: { init: vi.fn() },
 }))
 
+vi.mock('@sentry/react', () => ({
+  init: vi.fn(),
+}))
+
 describe('initAnalytics', () => {
   beforeEach(() => {
     vi.resetModules()
@@ -47,6 +51,17 @@ describe('initAnalytics', () => {
     initAnalytics()
     expect(posthog.init).toHaveBeenCalledWith('test-key', {
       api_host: 'https://test.host',
+    })
+  })
+
+  it('initializes Sentry when DSN is provided', async () => {
+    process.env.NEXT_PUBLIC_SENTRY_DSN = 'https://example.com/1'
+    const Sentry = await import('@sentry/react')
+    const { initAnalytics } = await import('./analytics')
+    vi.stubGlobal('window', {})
+    initAnalytics()
+    expect(Sentry.init).toHaveBeenCalledWith({
+      dsn: 'https://example.com/1',
     })
   })
 })

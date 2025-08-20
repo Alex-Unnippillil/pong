@@ -1,5 +1,7 @@
+import { env } from '@/lib/env.server'
 import { prisma } from '@/lib/prisma'
 import { redis } from '@/lib/redis'
+import * as Sentry from '@sentry/node'
 
 interface Stats {
   elo: number
@@ -87,6 +89,11 @@ interface AnalyticsGlobal {
       properties: Record<string, unknown>
     }) => void
   }
+}
+
+if (env.SENTRY_DSN) {
+  Sentry.init({ dsn: env.SENTRY_DSN })
+  ;(globalThis as AnalyticsGlobal).Sentry = Sentry
 }
 
 function reportError(err: unknown, context?: Record<string, unknown>) {
