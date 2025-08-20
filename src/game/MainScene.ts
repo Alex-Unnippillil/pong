@@ -6,6 +6,7 @@ import { aiMove, movePaddle } from './paddle'
 import { ScoreManager, Side } from './score'
 
 export default class MainScene extends Phaser.Scene {
+  private static readonly INTERPOLATION = 0.2
   private ball!: Phaser.GameObjects.Arc
   private player!: Phaser.GameObjects.Rectangle
   private opponent!: Phaser.GameObjects.Rectangle
@@ -151,7 +152,7 @@ export default class MainScene extends Phaser.Scene {
       this.opponent.y = Phaser.Math.Linear(
         this.opponent.y,
         this.remotePaddleY,
-        0.2,
+        MainScene.INTERPOLATION,
       )
     } else {
       this.opponent.y = aiMove(
@@ -168,8 +169,16 @@ export default class MainScene extends Phaser.Scene {
     this.ball.y += this.velocity.y * dt
 
     if (hasRemote && this.remoteBall) {
-      this.ball.x = Phaser.Math.Linear(this.ball.x, this.remoteBall.x, 0.2)
-      this.ball.y = Phaser.Math.Linear(this.ball.y, this.remoteBall.y, 0.2)
+      this.ball.x = Phaser.Math.Linear(
+        this.ball.x,
+        this.remoteBall.x,
+        MainScene.INTERPOLATION,
+      )
+      this.ball.y = Phaser.Math.Linear(
+        this.ball.y,
+        this.remoteBall.y,
+        MainScene.INTERPOLATION,
+      )
       this.velocity.set(this.remoteBall.vx, this.remoteBall.vy)
     }
 
