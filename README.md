@@ -1,4 +1,4 @@
-# PhotonPong
+# multiplayer online pong. with auth & matchmaking
 
 [![codecov](https://codecov.io/gh/mirrors/pong/branch/main/graph/badge.svg)](https://codecov.io/gh/mirrors/pong)
 
